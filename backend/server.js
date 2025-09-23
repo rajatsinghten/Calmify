@@ -20,10 +20,26 @@ const routes = require('./routes');
 const app = express();
 const server = http.createServer(app);
 
+// Define allowed origins
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:8080", 
+  "http://localhost:5173",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:8080",
+  "http://127.0.0.1:5173"
+];
+
+// Add origins from environment variable if set
+if (process.env.SOCKET_ORIGIN) {
+  const envOrigins = process.env.SOCKET_ORIGIN.split(',').map(origin => origin.trim());
+  allowedOrigins.push(...envOrigins);
+}
+
 // Initialize Socket.io with CORS
 const io = socketIo(server, {
   cors: {
-    origin: process.env.SOCKET_ORIGIN || "http://localhost:3000",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -69,7 +85,7 @@ app.use('/api/auth/register', authLimiter);
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.SOCKET_ORIGIN || "http://localhost:3000",
+  origin: allowedOrigins,
   credentials: true
 }));
 
@@ -859,11 +875,11 @@ const startServer = async () => {
     await connectDB();
     
     server.listen(PORT, () => {
-      console.log('🚀 Saneyar Mental Health Support Platform');
+      console.log('🚀 Calmify Mental Health Support Platform');
       console.log(`📡 Server running on port ${PORT}`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`💾 Database: ${MONGODB_URI}`);
-      console.log(`🔗 Socket.io CORS origin: ${process.env.SOCKET_ORIGIN || 'http://localhost:3000'}`);
+      console.log(`🔗 CORS allowed origins: ${allowedOrigins.join(', ')}`);
       console.log('✅ Server started successfully');
     });
   } catch (error) {

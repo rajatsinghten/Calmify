@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Calmify Mental Health Platform - Clean Minimal Design System */
+
+@layer base {
+  :root {
+    /* Clean white background */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 15%;
+
+    /* Card styles */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%;
+
+    /* Popover styles */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 15%;
+
+    /* Teal primary - calming mental health color */
+    --primary: 172 66% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Light gray secondary */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 15%;
+
+    /* Muted backgrounds */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    /* Accent matches primary */
+    --accent: 172 66% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Emergency red */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Minimal borders */
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 172 66% 50%;
+
+    /* Rounded corners */
+    --radius: 0.5rem;
+
+    /* Clean sidebar - better contrast */
+    --sidebar-background: 0 0% 96%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 172 66% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 88%;
+    --sidebar-accent-foreground: 0 0% 5%;
+    --sidebar-border: 0 0% 85%;
+    --sidebar-ring: 172 66% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Additional minimal styling */
+.text-sidebar {
+  color: hsl(var(--sidebar-foreground));
+}
+
+.text-sidebar-muted {
+  color: hsl(var(--muted-foreground));
+}
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

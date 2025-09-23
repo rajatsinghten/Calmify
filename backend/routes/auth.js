@@ -61,6 +61,93 @@ router.post('/register',
   }
 );
 
+// Admin registration endpoint (only accessible by existing admins)
+router.post('/register-admin', 
+  auth.authenticateToken,
+  auth.requireRole(['admin']),
+  validation.validate(validation.validateRegistration),
+  async (req, res) => {
+    try {
+      const { 
+        username, 
+        email, 
+        password, 
+        role = 'admin',
+        profile = {},
+        preferences = {}
+      } = req.body;
+
+      // Validate admin roles
+      const adminRoles = ['admin', 'counselor'];
+      if (!adminRoles.includes(role)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid role. Only admin and counselor roles are allowed for admin registration'
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ 
+        $or: [{ email }, { username }] 
+      });
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          error: 'User with this email or username already exists'
+        });
+      }
+
+      // Create new admin/counselor user with extended profile
+      const userData = {
+        username,
+        email,
+        password,
+        role,
+        profile: {
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          age: profile.age || 25,
+          bio: profile.bio
+        },
+        preferences: {
+          crisisAlerts: preferences.crisisAlerts !== false, // Default to true
+          emailNotifications: preferences.emailNotifications !== false, // Default to true
+          anonymousMode: false // Admins/counselors can't be anonymous
+        },
+        isActive: true
+      };
+
+      const user = new User(userData);
+      await user.save();
+
+      // Generate JWT tokens
+      const token = jwt.generateAccessToken(user);
+      const refreshToken = jwt.generateRefreshToken(user);
+
+      res.status(201).json({
+        success: true,
+        message: `${role.charAt(0).toUpperCase() + role.slice(1)} user registered successfully`,
+        data: {
+          user: user.toJSON(),
+          tokens: {
+            accessToken: token,
+            refreshToken: refreshToken,
+            expiresIn: 3600
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Admin registration error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Admin registration failed',
+        details: error.message
+      });
+    }
+  }
+);
+
 // User login with JWT token return
 router.post('/login',
   validation.validate(validation.validateLogin),

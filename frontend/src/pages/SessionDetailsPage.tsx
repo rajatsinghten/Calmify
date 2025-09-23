@@ -1,0 +1,356 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Layout } from '@/components/Layout';
+import { useAuth } from '../contexts/AuthContext';
+import { apiService, Session, Message } from '../services/api';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Send, MessageCircle, Clock, User, Star, AlertTriangle } from "lucide-react";
+
+export default function SessionDetailsPage() {
+  const { sessionId } = useParams<{ sessionId: string }>();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const [session, setSession] = useState<Session | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    if (sessionId) {
+      loadSession();
+    }
+  }, [sessionId, isAuthenticated]);
+
+  const loadSession = async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.getSession(sessionId!);
+      setSession(response.session);
+      setMessages(response.messages || []);
+    } catch (err: any) {
+      console.error('Failed to load session:', err);
+      setError(err.message || 'Failed to load session');
+      if (err.message.includes('Access denied') || err.message.includes('not found')) {
+        navigate('/');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !sessionId || sending) return;
+
+    try {
+      setSending(true);
+      const response = await apiService.sendMessage({
+        sessionId,
+        message: newMessage.trim(),
+        messageType: 'text'
+      });
+
+      // Add the new message to the list
+      setMessages(prev => [...prev, response.messageData]);
+      setNewMessage('');
+    } catch (err: any) {
+      console.error('Failed to send message:', err);
+      setError(err.message || 'Failed to send message');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'bg-red-100 text-red-800 border-red-200';
+      case 'severe': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'moderate': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'mild': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'waiting': return 'bg-yellow-100 text-yellow-800';
+      case 'closed': return 'bg-gray-100 text-gray-800';
+      case 'escalated': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  if (loading) {
+    return (
+      <Layout currentRole={user?.role || 'patient'}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span>Loading session...</span>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error && !session) {
+    return (
+      <Layout currentRole={user?.role || 'patient'}>
+        <div className="max-w-4xl mx-auto p-6">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!session) {
+    return (
+      <Layout currentRole={user?.role || 'patient'}>
+        <div className="max-w-4xl mx-auto p-6">
+          <Alert>
+            <AlertDescription>Session not found.</AlertDescription>
+          </Alert>
+        </div>
+      </Layout>
+    );
+  }
+
+  const isPatient = session.patientId._id === user?._id;
+  const isHelper = session.helperId?._id === user?._id;
+  const canSendMessages = session.status === 'active' && (isPatient || isHelper);
+
+  return (
+    <Layout currentRole={user?.role || 'patient'}>
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Session Info Sidebar */}
+          <div className="lg:col-span-1 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Session Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={getStatusColor(session.status)}>
+                    {session.status}
+                  </Badge>
+                  <Badge variant="outline" className={getSeverityColor(session.severity)}>
+                    {session.severity}
+                  </Badge>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Patient</p>
+                      <p className="text-xs text-muted-foreground">
+                        {session.patientId.profile?.preferredName || 
+                         session.patientId.profile?.firstName || 
+                         session.patientId.username}
+                      </p>
+                    </div>
+                  </div>
+
+                  {session.helperId && (
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">{session.helperType}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {session.helperId.profile?.firstName || session.helperId.username}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Created</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(session.createdAt).toLocaleDateString()} {formatTime(session.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {session.title && (
+                    <div>
+                      <p className="text-sm font-medium">Title</p>
+                      <p className="text-xs text-muted-foreground">{session.title}</p>
+                    </div>
+                  )}
+
+                  {session.description && (
+                    <div>
+                      <p className="text-sm font-medium">Description</p>
+                      <p className="text-xs text-muted-foreground">{session.description}</p>
+                    </div>
+                  )}
+
+                  {session.rating && (
+                    <div className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      <div>
+                        <p className="text-sm font-medium">Rating</p>
+                        <p className="text-xs text-muted-foreground">{session.rating}/5</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {session.status === 'waiting' && user?.role !== 'patient' && (
+              <Card>
+                <CardContent className="pt-6">
+                  <Button 
+                    className="w-full" 
+                    onClick={() => {
+                      // Handle session acceptance
+                      console.log('Accept session');
+                    }}
+                  >
+                    Accept Session
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Chat Area */}
+          <div className="lg:col-span-3">
+            <Card className="h-[600px] flex flex-col">
+              <CardHeader className="border-b">
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
+                  {session.title || `${session.helperType} Session`}
+                </CardTitle>
+              </CardHeader>
+
+              {/* Messages */}
+              <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <div className="text-center">
+                      <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No messages yet. Start the conversation!</p>
+                    </div>
+                  </div>
+                ) : (
+                  messages.map((message) => {
+                    const isMyMessage = message.senderId._id === user?._id;
+                    return (
+                      <div
+                        key={message._id}
+                        className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                            isMyMessage
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-foreground'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-medium">
+                              {isMyMessage ? 'You' : (
+                                message.senderId.profile?.preferredName || 
+                                message.senderId.profile?.firstName || 
+                                message.senderId.username
+                              )}
+                            </span>
+                            <span className="text-xs opacity-70">
+                              {formatTime(message.createdAt)}
+                            </span>
+                          </div>
+                          <p className="text-sm">{message.message}</p>
+                          {message.crisisDetected && (
+                            <div className="mt-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
+                              Crisis indicators detected
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </CardContent>
+
+              {/* Message Input */}
+              {canSendMessages && (
+                <div className="border-t p-4">
+                  {error && (
+                    <Alert variant="destructive" className="mb-4">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Type your message..."
+                      disabled={sending}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim() || sending}
+                    >
+                      {sending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {session.status === 'waiting' && (
+                <div className="border-t p-4 text-center text-muted-foreground">
+                  <p>Waiting for a helper to join this session...</p>
+                </div>
+              )}
+
+              {session.status === 'closed' && (
+                <div className="border-t p-4 text-center text-muted-foreground">
+                  <p>This session has been closed.</p>
+                </div>
+              )}
+            </Card>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
