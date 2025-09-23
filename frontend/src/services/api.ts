@@ -441,6 +441,58 @@ class ApiService {
     return this.handleResponse<any>(response);
   }
 
+  // Assessment APIs
+  async submitAssessment(assessmentData: {
+    questionnaires: any;
+    functionalImpact: any;
+    overallResults: any;
+    timeToComplete?: number;
+    startedAt?: string;
+    deviceType?: string;
+    notes?: string;
+  }): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/assessment/submit`, {
+      method: 'POST',
+      headers: {
+        ...this.getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(assessmentData),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async getLatestAssessment(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/assessment/latest`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async getAssessmentHistory(limit?: number): Promise<any> {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+
+    const response = await fetch(`${API_BASE_URL}/assessment/history?${params}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async getAssessment(sessionId: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/assessment/${sessionId}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
   // Crisis Management APIs
   async createCrisisAlert(alertData: {
     severity: 'medium' | 'high' | 'critical';

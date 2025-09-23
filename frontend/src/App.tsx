@@ -14,6 +14,7 @@ import CounsellorSessionPage from "./pages/CounsellorSessionPage";
 import AdminAnalyticsPage from "./pages/AdminAnalyticsPage";
 import SessionDetailsPage from "./pages/SessionDetailsPage";
 import QuestionnairePage from "./pages/QuestionnairePage";
+import AssessmentPage from "./pages/AssessmentPage";
 import CrisisPage from "./pages/CrisisPage";
 import NotFound from "./pages/NotFound";
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
             <Route path="/session/:sessionId" element={<SessionDetailsPage />} />
             <Route path="/questionnaire/:type" element={<QuestionnairePage />} />
+            <Route path="/assessment" element={<AssessmentPage />} />
             <Route path="/crisis" element={<CrisisPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

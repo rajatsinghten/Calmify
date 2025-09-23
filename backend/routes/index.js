@@ -8,6 +8,7 @@ const urgent = require('./urgent');
 const questionnaires = require('./questionnaires');
 const responses = require('./responses');
 const results = require('./results');
+const assessment = require('./assessment');
 
 module.exports = {
   auth,
@@ -19,5 +20,6 @@ module.exports = {
   urgent,
   questionnaires,
   responses,
-  results
+  results,
+  assessment
 };

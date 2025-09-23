@@ -4,6 +4,7 @@ const Message = require('./Message');
 const CrisisAlert = require('./CrisisAlert');
 const Questionnaire = require('./Questionnaire');
 const Response = require('./Response');
+const Assessment = require('./Assessment');
 
 module.exports = {
   User,
@@ -11,5 +12,6 @@ module.exports = {
   Message,
   CrisisAlert,
   Questionnaire,
-  Response
+  Response,
+  Assessment
 };

@@ -53,7 +53,7 @@ const roleConfigs = {
       { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
       { title: "Peer Support", url: "/peer/chats", icon: Users },
       { title: "Counselor Sessions", url: "/counsellor/sessions", icon: UserCheck },
-      { title: "Take Assessment", url: "/questionnaire/PHQ-9", icon: FileText },
+      { title: "Mental Health Assessment", url: "/assessment", icon: FileText },
       { title: "Meditation", url: "/meditation", icon: Brain },
       { title: "Crisis Help", url: "/crisis", icon: AlertTriangle },
     ]
@@ -102,7 +102,7 @@ const roleConfigs = {
       { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
       { title: "Peer Support", url: "/peer/chats", icon: Users },
       { title: "Counselor Sessions", url: "/counsellor/sessions", icon: UserCheck },
-      { title: "Take Assessment", url: "/questionnaire/PHQ-9", icon: FileText },
+      { title: "Mental Health Assessment", url: "/assessment", icon: FileText },
       { title: "Meditation", url: "/meditation", icon: Brain },
       { title: "Crisis Help", url: "/crisis", icon: AlertTriangle },
     ]
@@ -218,11 +218,11 @@ export function AppSidebar({ currentRole }: AppSidebarProps) {
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <NavLink
-                        to="/questionnaire/PHQ-9"
+                        to="/assessment"
                         className="flex items-center gap-3 px-4 py-2 text-xs text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-colors"
                       >
                         <FileText className="h-3 w-3" />
-                        <span>Quick Assessment</span>
+                        <span>Mental Health Assessment</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
