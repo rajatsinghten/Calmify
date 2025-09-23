@@ -42,7 +42,7 @@ export default function SessionDetailsPage() {
       console.error('Failed to load session:', err);
       setError(err.message || 'Failed to load session');
       if (err.message.includes('Access denied') || err.message.includes('not found')) {
-        navigate('/');
+        navigate('/dashboard');
       }
     } finally {
       setLoading(false);
@@ -107,7 +107,7 @@ export default function SessionDetailsPage() {
 
   if (loading) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="flex items-center justify-center min-h-screen">
           <div className="flex items-center gap-2">
             <Loader2 className="h-6 w-6 animate-spin" />
@@ -120,7 +120,7 @@ export default function SessionDetailsPage() {
 
   if (error && !session) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="max-w-4xl mx-auto p-6">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
@@ -133,7 +133,7 @@ export default function SessionDetailsPage() {
 
   if (!session) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="max-w-4xl mx-auto p-6">
           <Alert>
             <AlertDescription>Session not found.</AlertDescription>
@@ -148,7 +148,7 @@ export default function SessionDetailsPage() {
   const canSendMessages = session.status === 'active' && (isPatient || isHelper);
 
   return (
-    <Layout currentRole={user?.role || 'patient'}>
+    <Layout >
       <div className="max-w-6xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Session Info Sidebar */}

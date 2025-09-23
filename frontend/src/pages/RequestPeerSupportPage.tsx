@@ -42,7 +42,7 @@ export default function RequestPeerSupportPage() {
     }
 
     if (user?.role !== 'patient') {
-      navigate('/');
+      navigate('/dashboard');
       return;
     }
 
@@ -119,7 +119,7 @@ export default function RequestPeerSupportPage() {
   }
 
   return (
-    <Layout currentRole={user?.role || 'patient'}>
+    <Layout>
       <div className="min-h-screen bg-background py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">

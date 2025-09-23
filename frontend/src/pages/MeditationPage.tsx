@@ -121,10 +121,8 @@ export default function MeditationPage() {
     // For now, we'll just log the action
   };
 
-  const currentRole = user?.role || "patient";
-
   return (
-    <Layout currentRole={currentRole}>
+    <Layout>
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="bg-white border-b px-6 py-4">

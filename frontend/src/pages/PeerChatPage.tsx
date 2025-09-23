@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { apiService } from "../services/api";
+import { useChatSocket } from "../hooks/useSocket";
 import { Layout } from "@/components/Layout";
 import { ChatBubble } from "@/components/ChatBubble";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Send, Users, Clock, AlertTriangle, User, MessageCircle, CheckCircle, XCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Send, Users, Clock, AlertTriangle, User, MessageCircle, CheckCircle, XCircle, Star, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface Session {
@@ -55,10 +59,18 @@ export default function PeerChatPage() {
   const navigate = useNavigate();
   const [availableSessions, setAvailableSessions] = useState<Session[]>([]);
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCloseDialog, setShowCloseDialog] = useState(false);
+  const [closeRating, setCloseRating] = useState<number>(0);
+  const [closeFeedback, setCloseFeedback] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Socket.IO integration for real-time chat
+  const socket = useChatSocket(currentSession?._id);
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== 'peer') {
@@ -68,6 +80,29 @@ export default function PeerChatPage() {
     
     loadAvailableSessions();
   }, [isAuthenticated, user, navigate]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [socket.messages]);
+
+  // Load existing messages when session starts
+  useEffect(() => {
+    if (currentSession) {
+      loadSessionMessages(currentSession._id);
+    }
+  }, [currentSession]);
+
+  const loadSessionMessages = async (sessionId: string) => {
+    try {
+      const response = await apiService.getSession(sessionId);
+      if (response.messages) {
+        socket.setMessages(response.messages);
+      }
+    } catch (error) {
+      console.error('Failed to load session messages:', error);
+    }
+  };
 
   const loadAvailableSessions = async () => {
     try {
@@ -90,13 +125,10 @@ export default function PeerChatPage() {
       setLoading(true);
       await apiService.acceptSession(session._id, "Hi, I'm here to help and support you. How are you feeling today?");
       
-      // Load session details and messages
-      const sessionDetails = await apiService.getSession(session._id);
-      setCurrentSession(sessionDetails.session);
-      setMessages(sessionDetails.messages);
-      
-      // Remove from available sessions
+      // Set current session - this will trigger Socket.IO to join the session
+      setCurrentSession(session);
       setAvailableSessions(prev => prev.filter(s => s._id !== session._id));
+      setError(null);
     } catch (error) {
       console.error('Failed to accept session:', error);
       setError('Failed to accept session');
@@ -115,47 +147,68 @@ export default function PeerChatPage() {
     }
   };
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !currentSession) return;
+  const sendMessage = useCallback(async () => {
+    if (!newMessage.trim() || !currentSession || !socket.isConnected) return;
 
+    const messageText = newMessage.trim();
+    setNewMessage("");
+    
+    // Stop typing indicator
+    handleTypingStop();
+    
     try {
-      await apiService.sendMessage({
-        sessionId: currentSession._id,
-        message: newMessage.trim(),
-        messageType: 'text'
-      });
-
-      // Add message to local state immediately for better UX
-      const messageData: Message = {
-        _id: `temp-${Date.now()}`,
-        sessionId: currentSession._id,
-        senderId: {
-          _id: user!._id,
-          username: user!.username,
-          profile: user!.profile
-        },
-        message: newMessage.trim(),
-        senderRole: 'peer',
-        messageType: 'text',
-        createdAt: new Date().toISOString()
-      };
-
-      setMessages(prev => [...prev, messageData]);
-      setNewMessage("");
-
-      // Reload messages to get the actual message from backend
-      setTimeout(async () => {
-        try {
-          const sessionDetails = await apiService.getSession(currentSession._id);
-          setMessages(sessionDetails.messages);
-        } catch (error) {
-          console.error('Failed to reload messages:', error);
-        }
-      }, 1000);
-
+      // Send message via Socket.IO for real-time delivery
+      socket.sendMessage(currentSession._id, messageText);
     } catch (error) {
       console.error('Failed to send message:', error);
       setError('Failed to send message');
+      // Restore message on error
+      setNewMessage(messageText);
+    }
+  }, [newMessage, currentSession, socket]);
+
+  const handleTypingStart = useCallback(() => {
+    if (!currentSession || isTyping) return;
+    
+    setIsTyping(true);
+    socket.setTyping(currentSession._id, true);
+    
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Set timeout to stop typing indicator
+    typingTimeoutRef.current = setTimeout(() => {
+      handleTypingStop();
+    }, 2000);
+  }, [currentSession, isTyping, socket]);
+
+  const handleTypingStop = useCallback(() => {
+    if (!currentSession || !isTyping) return;
+    
+    setIsTyping(false);
+    socket.setTyping(currentSession._id, false);
+    
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+  }, [currentSession, isTyping, socket]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    if (e.target.value.trim()) {
+      handleTypingStart();
+    } else {
+      handleTypingStop();
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
   };
 
@@ -164,6 +217,15 @@ export default function PeerChatPage() {
 
     try {
       setLoading(true);
+      // Use Socket.IO to escalate session for real-time notification
+      socket.escalateSession(
+        currentSession._id,
+        'severe',
+        'Session escalated to professional counselor for specialized support',
+        'counselor'
+      );
+      
+      // Also use API for backup
       await apiService.closeSession(
         currentSession._id, 
         undefined, 
@@ -171,7 +233,7 @@ export default function PeerChatPage() {
       );
       
       setCurrentSession(null);
-      setMessages([]);
+      socket.setMessages([]);
       await loadAvailableSessions();
     } catch (error) {
       console.error('Failed to escalate session:', error);
@@ -181,14 +243,34 @@ export default function PeerChatPage() {
     }
   };
 
+  const openCloseDialog = () => {
+    setShowCloseDialog(true);
+  };
+
   const endSession = async () => {
     if (!currentSession) return;
 
     try {
       setLoading(true);
-      await apiService.closeSession(currentSession._id);
+      
+      // Use Socket.IO to update session status for real-time notification
+      socket.updateSessionStatus(currentSession._id, 'closed', {
+        rating: closeRating || undefined,
+        feedback: closeFeedback.trim() || "Session completed - peer support provided"
+      });
+      
+      // Also use API for backup
+      await apiService.closeSession(
+        currentSession._id,
+        closeRating || undefined,
+        closeFeedback.trim() || "Session completed - peer support provided"
+      );
+      
       setCurrentSession(null);
-      setMessages([]);
+      socket.setMessages([]);
+      setCloseRating(0);
+      setCloseFeedback("");
+      setShowCloseDialog(false);
       await loadAvailableSessions();
     } catch (error) {
       console.error('Failed to end session:', error);
@@ -215,7 +297,7 @@ export default function PeerChatPage() {
 
   return (
     <Layout currentRole="peer">
-      <div className="flex h-screen bg-background">
+      <div className="flex h-full bg-background">
         {/* Session List Sidebar */}
         <div className="w-80 bg-white border-r border-border p-4 overflow-y-auto">
           <div className="space-y-4">
@@ -344,7 +426,7 @@ export default function PeerChatPage() {
                     <Button 
                       size="sm" 
                       variant="destructive"
-                      onClick={endSession}
+                      onClick={openCloseDialog}
                     >
                       End Session
                     </Button>
@@ -354,7 +436,7 @@ export default function PeerChatPage() {
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message) => (
+                {socket.messages.map((message) => (
                   <div key={message._id} className={`flex ${message.senderRole === 'peer' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`flex gap-2 max-w-[80%] ${message.senderRole === 'peer' ? 'flex-row-reverse' : 'flex-row'}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -374,6 +456,26 @@ export default function PeerChatPage() {
                     </div>
                   </div>
                 ))}
+                
+                {/* Typing indicator */}
+                {socket.isTypingIndicatorVisible && (
+                  <div className="flex justify-start">
+                    <div className="flex gap-2 max-w-[80%]">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <User className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div className="bg-gray-100 rounded-lg px-3 py-2">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Input */}
@@ -381,18 +483,30 @@ export default function PeerChatPage() {
                 <div className="flex gap-2">
                   <Input
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={handleInputChange}
                     placeholder="Type a supportive message..."
-                    onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                    onKeyPress={handleKeyPress}
+                    disabled={!socket.isConnected || loading}
                     className="flex-1"
                   />
-                  <Button onClick={sendMessage} disabled={!newMessage.trim()}>
-                    <Send className="h-4 w-4" />
+                  <Button 
+                    onClick={sendMessage} 
+                    disabled={!newMessage.trim() || !socket.isConnected || loading}
+                  >
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Remember to be supportive, non-judgmental, and refer to professionals when needed.
-                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-muted-foreground">
+                    Remember to be supportive, non-judgmental, and refer to professionals when needed.
+                  </p>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className={`w-2 h-2 rounded-full ${socket.isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                    <span className="text-muted-foreground">
+                      {socket.isConnected ? 'Connected' : 'Disconnected'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </>
           ) : (
@@ -411,6 +525,57 @@ export default function PeerChatPage() {
           )}
         </div>
       </div>
+
+      {/* Close Session Dialog */}
+      <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>End Peer Support Session</DialogTitle>
+            <DialogDescription>
+              You're about to end this peer support session. Please provide a rating and any feedback about the conversation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="rating">How would you rate this session?</Label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setCloseRating(star)}
+                    className={`w-8 h-8 flex items-center justify-center ${
+                      star <= closeRating 
+                        ? 'text-yellow-400' 
+                        : 'text-gray-300'
+                    }`}
+                  >
+                    <Star className={`w-6 h-6 ${star <= closeRating ? 'fill-current' : ''}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="feedback">Session notes or feedback (optional)</Label>
+              <Textarea
+                id="feedback"
+                value={closeFeedback}
+                onChange={(e) => setCloseFeedback(e.target.value)}
+                placeholder="Any notes about this peer support session..."
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCloseDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={endSession} disabled={loading}>
+              End Session
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }

@@ -4,8 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Heart, Eye, EyeOff, User, Users, Stethoscope } from "lucide-react";
 
@@ -33,7 +31,7 @@ export default function LoginPage() {
         ...(formData.preferredRole && { preferredRole: formData.preferredRole })
       };
       await login(loginData);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check your credentials.');
     }
@@ -92,37 +90,39 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Heart className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">Calmify</h1>
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+              <Heart className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Calmify</h1>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-gray-600">
             Your safe space for mental health support
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center">Welcome Back</CardTitle>
-            <CardDescription className="text-center">
+        <div className="bg-white rounded-3xl border border-gray-200 shadow-xl p-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+            <p className="text-gray-600">
               Sign in to continue your journey to better mental health
-            </CardDescription>
-          </CardHeader>
+            </p>
+          </div>
           
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <div className="space-y-4">
               {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -132,17 +132,18 @@ export default function LoginPage() {
                   onChange={handleInputChange}
                   required
                   disabled={isLoading}
+                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="role">I am logging in as</Label>
+                <Label htmlFor="role" className="text-gray-700 font-medium">I am logging in as</Label>
                 <Select 
                   value={formData.preferredRole} 
                   onValueChange={handleRoleChange}
                   disabled={isLoading}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -151,7 +152,7 @@ export default function LoginPage() {
                         <User className="h-4 w-4" />
                         <div>
                           <div className="font-medium">Patient</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-gray-500">
                             Seeking support and mental health resources
                           </div>
                         </div>
@@ -162,7 +163,7 @@ export default function LoginPage() {
                         <Users className="h-4 w-4" />
                         <div>
                           <div className="font-medium">Peer Supporter</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-gray-500">
                             Providing peer support to others
                           </div>
                         </div>
@@ -173,7 +174,7 @@ export default function LoginPage() {
                         <Stethoscope className="h-4 w-4" />
                         <div>
                           <div className="font-medium">Counselor</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-gray-500">
                             Professional mental health counselor
                           </div>
                         </div>
@@ -182,7 +183,7 @@ export default function LoginPage() {
                   </SelectContent>
                 </Select>
                 {formData.preferredRole && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
                     {getRoleIcon(formData.preferredRole)}
                     <span>{getRoleDescription(formData.preferredRole)}</span>
                   </div>
@@ -190,7 +191,7 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -201,6 +202,7 @@ export default function LoginPage() {
                     onChange={handleInputChange}
                     required
                     disabled={isLoading}
+                    className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
                   />
                   <Button
                     type="button"
@@ -211,9 +213,9 @@ export default function LoginPage() {
                     disabled={isLoading}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-4 w-4 text-gray-400" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4 text-gray-400" />
                     )}
                   </Button>
                 </div>
@@ -226,94 +228,78 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleInputChange}
-                  className="rounded border-border"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   disabled={isLoading}
                 />
-                <Label htmlFor="rememberMe" className="text-sm">
+                <Label htmlFor="rememberMe" className="text-sm text-gray-600">
                   Remember me
                 </Label>
               </div>
-            </CardContent>
+            </div>
 
-            <CardFooter className="flex flex-col space-y-4">
-              <Button 
+            <div className="space-y-4 mt-8">
+              <button 
                 type="submit" 
-                className="w-full" 
+                className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Signing in...
-                  </>
+                  </div>
                 ) : (
                   'Sign In'
                 )}
-              </Button>
+              </button>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
+                  <span className="w-full border-t border-gray-200" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">
+                  <span className="bg-white px-2 text-gray-500">
                     Or continue with
                   </span>
                 </div>
               </div>
 
-              <Button 
+              <button 
                 type="button" 
-                variant="outline" 
-                className="w-full"
+                className="w-full px-8 py-4 bg-gray-50 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleAnonymousLogin}
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Creating session...
-                  </>
+                  </div>
                 ) : (
                   'Continue Anonymously'
                 )}
-              </Button>
+              </button>
 
-              <div className="text-center text-sm text-muted-foreground">
+              <div className="text-center text-sm text-gray-600">
                 Don't have an account?{' '}
                 <Link 
                   to="/register" 
-                  className="text-primary hover:underline font-medium"
+                  className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
                 >
                   Sign up
                 </Link>
               </div>
 
-              <div className="text-center text-xs text-muted-foreground">
+              <div className="text-center text-xs text-gray-500">
                 <Link 
                   to="/forgot-password" 
-                  className="hover:underline"
+                  className="hover:text-gray-700 hover:underline"
                 >
                   Forgot your password?
                 </Link>
               </div>
-            </CardFooter>
+            </div>
           </form>
-        </Card>
-
-        {/* Emergency Resources */}
-        <div className="mt-6 p-4 bg-destructive/10 rounded-lg border border-destructive/20">
-          <h3 className="font-semibold text-destructive mb-2">
-            Crisis Support
-          </h3>
-          <p className="text-sm text-muted-foreground mb-2">
-            If you're in immediate danger or having thoughts of self-harm:
-          </p>
-          <div className="space-y-1 text-sm">
-            <p><strong>Emergency:</strong> 911</p>
-            <p><strong>Crisis Hotline:</strong> 988</p>
-            <p><strong>Crisis Text:</strong> Text HOME to 741741</p>
-          </div>
         </div>
       </div>
     </div>

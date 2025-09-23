@@ -155,7 +155,7 @@ export default function QuestionnairePage() {
 
   if (loading) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="flex items-center justify-center min-h-screen">
           <div className="flex items-center gap-2">
             <Loader2 className="h-6 w-6 animate-spin" />
@@ -168,13 +168,13 @@ export default function QuestionnairePage() {
 
   if (error && !questionnaire) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="max-w-4xl mx-auto p-6">
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
           <Button 
-            onClick={() => navigate('/')} 
+            onClick={() => navigate('/dashboard')} 
             className="mt-4"
             variant="outline"
           >
@@ -188,7 +188,7 @@ export default function QuestionnairePage() {
 
   if (completed && results) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="max-w-4xl mx-auto p-6">
           <Card>
             <CardHeader className="text-center">
@@ -231,7 +231,7 @@ export default function QuestionnairePage() {
               </div>
 
               <div className="flex justify-center gap-4">
-                <Button onClick={() => navigate('/')} variant="outline">
+                <Button onClick={() => navigate('/dashboard')} variant="outline">
                   Return Home
                 </Button>
                 <Button onClick={() => navigate('/chatbot')}>
@@ -262,7 +262,7 @@ export default function QuestionnairePage() {
 
   if (!questionnaire) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="max-w-4xl mx-auto p-6">
           <Alert>
             <AlertDescription>Questionnaire not found.</AlertDescription>
@@ -277,7 +277,7 @@ export default function QuestionnairePage() {
   const currentAnswer = answers[currentQuestion + 1];
 
   return (
-    <Layout currentRole={user?.role || 'patient'}>
+    <Layout >
       <div className="max-w-4xl mx-auto p-6">
         <Card>
           <CardHeader>

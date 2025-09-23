@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiService, Session as ApiSession } from '../services/api';
+import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -222,18 +223,19 @@ const MySessionsPage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">My Sessions</h1>
-          <p className="text-muted-foreground">
-            {user?.role === 'patient' ? 'Track your support sessions and progress' :
-             user?.role === 'peer' ? 'Manage your peer support sessions' :
-             user?.role === 'counselor' ? 'View your counseling sessions and caseload' :
-             'Session management interface'}
-          </p>
+    <Layout>
+      <div className="space-y-6 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">My Sessions</h1>
+            <p className="text-muted-foreground">
+              {user?.role === 'patient' ? 'Track your support sessions and progress' :
+               user?.role === 'peer' ? 'Manage your peer support sessions' :
+               user?.role === 'counselor' ? 'View your counseling sessions and caseload' :
+               'Session management interface'}
+            </p>
+          </div>
         </div>
-      </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
@@ -328,7 +330,8 @@ const MySessionsPage: React.FC = () => {
           </TabsContent>
         )}
       </Tabs>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

@@ -4,8 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Heart, Eye, EyeOff, Info } from "lucide-react";
 
@@ -80,7 +78,7 @@ export default function RegisterPage() {
       };
 
       await register(userData);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
     }
@@ -114,42 +112,44 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Heart className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">Calmify</h1>
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+              <Heart className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Calmify</h1>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-gray-600">
             Join our supportive community for mental health
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center">Create Your Account</CardTitle>
-            <CardDescription className="text-center">
+        <div className="bg-white rounded-3xl border border-gray-200 shadow-xl p-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Your Account</h2>
+            <p className="text-gray-600">
               Start your journey to better mental health with us
-            </CardDescription>
-          </CardHeader>
+            </p>
+          </div>
           
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-6">
+            <div className="space-y-6">
               {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
               )}
 
               {/* Basic Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Basic Information</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username">Username *</Label>
+                    <Label htmlFor="username" className="text-gray-700 font-medium">Username *</Label>
                     <Input
                       id="username"
                       name="username"
@@ -158,11 +158,12 @@ export default function RegisterPage() {
                       onChange={handleInputChange}
                       required
                       disabled={isLoading}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email" className="text-gray-700 font-medium">Email *</Label>
                     <Input
                       id="email"
                       name="email"
@@ -172,13 +173,14 @@ export default function RegisterPage() {
                       onChange={handleInputChange}
                       required
                       disabled={isLoading}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password *</Label>
+                    <Label htmlFor="password" className="text-gray-700 font-medium">Password *</Label>
                     <div className="relative">
                       <Input
                         id="password"
@@ -189,6 +191,7 @@ export default function RegisterPage() {
                         onChange={handleInputChange}
                         required
                         disabled={isLoading}
+                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
                       />
                       <Button
                         type="button"
@@ -198,13 +201,13 @@ export default function RegisterPage() {
                         onClick={() => setShowPassword(!showPassword)}
                         disabled={isLoading}
                       >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
                       </Button>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                    <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirm Password *</Label>
                     <div className="relative">
                       <Input
                         id="confirmPassword"
@@ -215,6 +218,7 @@ export default function RegisterPage() {
                         onChange={handleInputChange}
                         required
                         disabled={isLoading}
+                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
                       />
                       <Button
                         type="button"
@@ -224,29 +228,33 @@ export default function RegisterPage() {
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         disabled={isLoading}
                       >
-                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
                       </Button>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role *</Label>
-                  <Select value={formData.role} onValueChange={handleRoleChange} disabled={isLoading}>
-                    <SelectTrigger>
+                  <Label htmlFor="role" className="text-gray-700 font-medium">Role *</Label>
+                  <Select 
+                    value={formData.role} 
+                    onValueChange={handleRoleChange} 
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="patient">
                         <div className="flex flex-col">
                           <span>Patient/Student</span>
-                          <span className="text-xs text-muted-foreground">Seeking mental health support</span>
+                          <span className="text-xs text-gray-500">Seeking mental health support</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="peer">
                         <div className="flex flex-col">
                           <span>Peer Volunteer</span>
-                          <span className="text-xs text-muted-foreground">Trained to provide peer support</span>
+                          <span className="text-xs text-gray-500">Trained to provide peer support</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -256,11 +264,11 @@ export default function RegisterPage() {
 
               {/* Profile Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Profile Information</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Profile Information</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="profile.firstName">First Name</Label>
+                    <Label htmlFor="profile.firstName" className="text-gray-700 font-medium">First Name</Label>
                     <Input
                       id="profile.firstName"
                       name="profile.firstName"
@@ -268,11 +276,12 @@ export default function RegisterPage() {
                       value={formData.profile.firstName}
                       onChange={handleInputChange}
                       disabled={isLoading}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="profile.lastName">Last Name</Label>
+                    <Label htmlFor="profile.lastName" className="text-gray-700 font-medium">Last Name</Label>
                     <Input
                       id="profile.lastName"
                       name="profile.lastName"
@@ -280,13 +289,14 @@ export default function RegisterPage() {
                       value={formData.profile.lastName}
                       onChange={handleInputChange}
                       disabled={isLoading}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="profile.preferredName">Preferred Name</Label>
+                    <Label htmlFor="profile.preferredName" className="text-gray-700 font-medium">Preferred Name</Label>
                     <Input
                       id="profile.preferredName"
                       name="profile.preferredName"
@@ -294,11 +304,12 @@ export default function RegisterPage() {
                       value={formData.profile.preferredName}
                       onChange={handleInputChange}
                       disabled={isLoading}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="profile.age">Age</Label>
+                    <Label htmlFor="profile.age" className="text-gray-700 font-medium">Age</Label>
                     <Input
                       id="profile.age"
                       name="profile.age"
@@ -309,6 +320,7 @@ export default function RegisterPage() {
                       value={formData.profile.age}
                       onChange={handleInputChange}
                       disabled={isLoading}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -317,16 +329,16 @@ export default function RegisterPage() {
               {/* Emergency Contact */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold">Emergency Contact</h3>
-                  <Info className="h-4 w-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold text-gray-900">Emergency Contact</h3>
+                  <Info className="h-4 w-4 text-gray-500" />
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-600">
                   Optional but recommended for crisis situations
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="profile.emergencyContact.name">Contact Name</Label>
+                    <Label htmlFor="profile.emergencyContact.name" className="text-gray-700 font-medium">Contact Name</Label>
                     <Input
                       id="profile.emergencyContact.name"
                       name="profile.emergencyContact.name"
@@ -334,11 +346,12 @@ export default function RegisterPage() {
                       value={formData.profile.emergencyContact.name}
                       onChange={handleInputChange}
                       disabled={isLoading}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="profile.emergencyContact.relationship">Relationship</Label>
+                    <Label htmlFor="profile.emergencyContact.relationship" className="text-gray-700 font-medium">Relationship</Label>
                     <Input
                       id="profile.emergencyContact.relationship"
                       name="profile.emergencyContact.relationship"
@@ -346,12 +359,13 @@ export default function RegisterPage() {
                       value={formData.profile.emergencyContact.relationship}
                       onChange={handleInputChange}
                       disabled={isLoading}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="profile.emergencyContact.phone">Contact Phone</Label>
+                  <Label htmlFor="profile.emergencyContact.phone" className="text-gray-700 font-medium">Contact Phone</Label>
                   <Input
                     id="profile.emergencyContact.phone"
                     name="profile.emergencyContact.phone"
@@ -360,6 +374,7 @@ export default function RegisterPage() {
                     value={formData.profile.emergencyContact.phone}
                     onChange={handleInputChange}
                     disabled={isLoading}
+                    className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -374,13 +389,13 @@ export default function RegisterPage() {
                       type="checkbox"
                       checked={formData.agreedToTerms}
                       onChange={handleInputChange}
-                      className="rounded border-border"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       disabled={isLoading}
                       required
                     />
-                    <Label htmlFor="agreedToTerms" className="text-sm">
+                    <Label htmlFor="agreedToTerms" className="text-sm text-gray-600">
                       I agree to the{' '}
-                      <Link to="/terms" className="text-primary hover:underline">
+                      <Link to="/terms" className="text-blue-600 hover:text-blue-700 hover:underline">
                         Terms of Service
                       </Link>
                     </Label>
@@ -393,49 +408,49 @@ export default function RegisterPage() {
                       type="checkbox"
                       checked={formData.agreedToPrivacy}
                       onChange={handleInputChange}
-                      className="rounded border-border"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       disabled={isLoading}
                       required
                     />
-                    <Label htmlFor="agreedToPrivacy" className="text-sm">
+                    <Label htmlFor="agreedToPrivacy" className="text-sm text-gray-600">
                       I agree to the{' '}
-                      <Link to="/privacy" className="text-primary hover:underline">
+                      <Link to="/privacy" className="text-blue-600 hover:text-blue-700 hover:underline">
                         Privacy Policy
                       </Link>
                     </Label>
                   </div>
                 </div>
               </div>
-            </CardContent>
+            </div>
 
-            <CardFooter className="flex flex-col space-y-4">
-              <Button 
+            <div className="space-y-4 mt-8">
+              <button 
                 type="submit" 
-                className="w-full" 
+                className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Creating account...
-                  </>
+                  </div>
                 ) : (
                   'Create Account'
                 )}
-              </Button>
+              </button>
 
-              <div className="text-center text-sm text-muted-foreground">
+              <div className="text-center text-sm text-gray-600">
                 Already have an account?{' '}
                 <Link 
                   to="/login" 
-                  className="text-primary hover:underline font-medium"
+                  className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
                 >
                   Sign in
                 </Link>
               </div>
-            </CardFooter>
+            </div>
           </form>
-        </Card>
+        </div>
       </div>
     </div>
   );

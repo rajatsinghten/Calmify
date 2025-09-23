@@ -58,26 +58,13 @@ const roleConfigs = {
       { title: "Crisis Help", url: "/crisis", icon: AlertTriangle },
     ]
   },
-  student: {
-    title: "Student",
-    icon: Users,
-    items: [
-      { title: "My Sessions", url: "/my-sessions", icon: Clock },
-      { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
-      { title: "Peer Support", url: "/peer/request", icon: Users },
-      { title: "Counselor Sessions", url: "/counselor/request", icon: UserCheck },
-      { title: "Take Assessment", url: "/assessment", icon: FileText },
-      { title: "Meditation", url: "/meditation", icon: Brain },
-      { title: "Crisis Help", url: "/crisis", icon: AlertTriangle },
-    ]
-  },
   peer: {
     title: "Peer Volunteer",
     icon: UserCheck,
     items: [
       { title: "Available Sessions", url: "/peer/available", icon: MessageCircle },
       { title: "My Sessions", url: "/my-sessions", icon: Clock },
-      { title: "Session History", url: "/peer/history", icon: Archive },
+      { title: "Session History", url: "/my-sessions", icon: Archive },
       { title: "Resources", url: "/peer/resources", icon: BookOpen },
       { title: "Training", url: "/peer/training", icon: Star },
     ]

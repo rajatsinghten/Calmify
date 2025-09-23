@@ -120,7 +120,7 @@ export default function ChatbotPage() {
   };
 
   return (
-    <Layout currentRole={user?.role || "student"}>
+    <Layout>
       <div className="flex flex-col h-full bg-background">
         {/* Header */}
         <div className="bg-white border-b border-border p-4 flex justify-between items-center">

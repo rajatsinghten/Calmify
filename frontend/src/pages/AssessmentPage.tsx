@@ -160,7 +160,7 @@ export default function AssessmentPage() {
 
     // Check if user is a patient (only patients can access assessments)
     if (user?.role && !['patient', 'student'].includes(user.role)) {
-      navigate('/');
+      navigate('/dashboard');
       return;
     }
 
@@ -542,7 +542,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
 
   if (!isAuthenticated || (user?.role && !['patient', 'student'].includes(user.role))) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="max-w-4xl mx-auto p-6">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
@@ -550,7 +550,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
               Access denied. Mental health assessments are only available to patients.
             </AlertDescription>
           </Alert>
-          <Button onClick={() => navigate('/')} className="mt-4" variant="outline">
+          <Button onClick={() => navigate('/dashboard')} className="mt-4" variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Go Back
           </Button>
@@ -561,7 +561,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
 
   if (checkingExisting) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="flex items-center justify-center min-h-screen">
           <div className="flex items-center gap-2">
             <Loader2 className="h-6 w-6 animate-spin" />
@@ -574,7 +574,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
 
   if (currentSection === 'existing' && hasExistingAssessment && existingAssessment) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="max-w-4xl mx-auto p-6">
           <Card>
             <CardHeader className="text-center">
@@ -680,7 +680,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Take New Assessment
                 </Button>
-                <Button onClick={() => navigate('/')} variant="ghost">
+                <Button onClick={() => navigate('/dashboard')} variant="ghost">
                   Return Home
                 </Button>
               </div>
@@ -693,7 +693,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
 
   if (currentSection === 'intro') {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="max-w-4xl mx-auto p-6">
           <Card>
             <CardHeader className="text-center">
@@ -753,7 +753,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
 
   if (currentSection === 'results') {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="max-w-4xl mx-auto p-6">
           <Card>
             <CardHeader className="text-center">
@@ -878,7 +878,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Take New Assessment
                 </Button>
-                <Button onClick={() => navigate('/')} variant="ghost">
+                <Button onClick={() => navigate('/dashboard')} variant="ghost">
                   Return Home
                 </Button>
               </div>
@@ -921,7 +921,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
 
   if (loading) {
     return (
-      <Layout currentRole={user?.role || 'patient'}>
+      <Layout >
         <div className="flex items-center justify-center min-h-screen">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -952,7 +952,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
     : questionnaires[currentSection as keyof typeof questionnaires]?.timeframe;
 
   return (
-    <Layout currentRole={user?.role || 'patient'}>
+    <Layout >
       <div className="max-w-4xl mx-auto p-6">
         <Card>
           <CardHeader>

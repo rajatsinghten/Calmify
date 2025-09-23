@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, AlertTriangle, Brain, BookOpen, Clock, UserPlus } from "lucide-react";
 
-export default function HomePage() {
+export default function Dashboard() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, isAuthenticated, createAnonymousSession } = useAuth();
@@ -41,7 +41,7 @@ export default function HomePage() {
         <section className="bg-gradient-to-br from-slate-50 to-slate-100 py-20">
           <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Your Safe Space for Mental Health
+              Welcome to Your Dashboard
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Connect with AI, peers, and counselors in a confidential environment designed for your wellbeing.
