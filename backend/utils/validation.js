@@ -153,6 +153,169 @@ const validateCrisisAlert = [
     .withMessage('Trigger content must be less than 2000 characters')
 ];
 
+// Questionnaire validation
+const questionnaireValidation = {
+  create: [
+    body('name')
+      .isLength({ min: 3, max: 100 })
+      .withMessage('Questionnaire name must be between 3 and 100 characters'),
+    
+    body('type')
+      .isIn(['PHQ-9', 'GAD-7', 'GHQ-12', 'GHQ-28'])
+      .withMessage('Invalid questionnaire type'),
+    
+    body('description')
+      .isLength({ min: 10, max: 500 })
+      .withMessage('Description must be between 10 and 500 characters'),
+    
+    body('instructions')
+      .isLength({ min: 10, max: 1000 })
+      .withMessage('Instructions must be between 10 and 1000 characters'),
+    
+    body('questions')
+      .isArray({ min: 1 })
+      .withMessage('At least one question is required'),
+    
+    body('questions.*.questionText')
+      .isLength({ min: 5, max: 500 })
+      .withMessage('Question text must be between 5 and 500 characters'),
+    
+    body('questions.*.questionNumber')
+      .isInt({ min: 1 })
+      .withMessage('Question number must be a positive integer'),
+    
+    body('questions.*.options')
+      .isArray({ min: 2 })
+      .withMessage('Each question must have at least 2 options'),
+    
+    body('scoringRules')
+      .isArray({ min: 1 })
+      .withMessage('At least one scoring rule is required'),
+    
+    body('maxScore')
+      .isInt({ min: 1 })
+      .withMessage('Max score must be a positive integer')
+  ],
+  
+  update: [
+    body('name')
+      .optional()
+      .isLength({ min: 3, max: 100 })
+      .withMessage('Questionnaire name must be between 3 and 100 characters'),
+    
+    body('description')
+      .optional()
+      .isLength({ min: 10, max: 500 })
+      .withMessage('Description must be between 10 and 500 characters'),
+    
+    body('isActive')
+      .optional()
+      .isBoolean()
+      .withMessage('isActive must be a boolean')
+  ]
+};
+
+// Response validation
+const responseValidation = {
+  start: [
+    body('questionnaireId')
+      .isMongoId()
+      .withMessage('Invalid questionnaire ID'),
+    
+    body('questionnaireType')
+      .isIn(['PHQ-9', 'GAD-7', 'GHQ-12', 'GHQ-28'])
+      .withMessage('Invalid questionnaire type'),
+    
+    body('deviceType')
+      .optional()
+      .isIn(['mobile', 'tablet', 'desktop', 'unknown'])
+      .withMessage('Invalid device type')
+  ],
+  
+  submitAnswer: [
+    body('sessionId')
+      .isUUID(4)
+      .withMessage('Invalid session ID'),
+    
+    body('questionNumber')
+      .isInt({ min: 1 })
+      .withMessage('Question number must be a positive integer'),
+    
+    body('questionId')
+      .isMongoId()
+      .withMessage('Invalid question ID'),
+    
+    body('selectedValue')
+      .isInt({ min: 0 })
+      .withMessage('Selected value must be a non-negative integer'),
+    
+    body('selectedText')
+      .isLength({ min: 1, max: 200 })
+      .withMessage('Selected text must be between 1 and 200 characters'),
+    
+    body('responseTime')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('Response time must be a non-negative integer')
+  ],
+  
+  complete: [
+    body('sessionId')
+      .isUUID(4)
+      .withMessage('Invalid session ID')
+  ],
+  
+  abandon: [
+    body('sessionId')
+      .isUUID(4)
+      .withMessage('Invalid session ID'),
+    
+    body('reason')
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage('Reason must be less than 500 characters')
+  ]
+};
+
+// Results validation
+const resultsValidation = {
+  adminAggregate: [
+    body('questionnaireType')
+      .optional()
+      .isIn(['PHQ-9', 'GAD-7', 'GHQ-12', 'GHQ-28'])
+      .withMessage('Invalid questionnaire type'),
+    
+    body('groupBy')
+      .optional()
+      .isIn(['day', 'week', 'month'])
+      .withMessage('Invalid groupBy parameter')
+  ],
+  
+  adminReview: [
+    body('reviewNotes')
+      .isLength({ min: 5, max: 1000 })
+      .withMessage('Review notes must be between 5 and 1000 characters'),
+    
+    body('actionTaken')
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage('Action taken must be less than 500 characters')
+  ]
+};
+
+// Generic validation request handler
+const validateRequest = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array()
+    });
+  }
+  next();
+};
+
 module.exports = {
   validate,
   validateRegistration,
@@ -161,5 +324,9 @@ module.exports = {
   validateSessionCreation,
   validateMessage,
   validateMessageContent,
-  validateCrisisAlert
+  validateCrisisAlert,
+  questionnaireValidation,
+  responseValidation,
+  resultsValidation,
+  validateRequest
 };

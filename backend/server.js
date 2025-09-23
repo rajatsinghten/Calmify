@@ -794,6 +794,9 @@ app.use('/api/crisis', routes.crisis);
 app.use('/api/ai', routes.ai);
 app.use('/api/chatbot', routes.chatbot);
 app.use('/api/urgent', routes.urgent);
+app.use('/api/questionnaires', routes.questionnaires);
+app.use('/api/responses', routes.responses);
+app.use('/api/results', routes.results);
 
 // 404 handler
 app.use('*', (req, res) => {

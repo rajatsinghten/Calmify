@@ -1,1177 +1,2382 @@
-# Saneyar Mental Health Platform - API Documentation
+# Saneyar Mental Health Platform - Complete API Documentation# Saneyar Mental Health Platform - Complete API Documentation
 
-## Table of Contents
-1. [Overview](#overview)
-2. [Authentication](#authentication)
-3. [Error Handling](#error-handling)
-4. [Rate Limiting](#rate-limiting)
-5. [Health Check](#health-check)
-6. [Authentication Endpoints](#authentication-endpoints)
-7. [Session Management](#session-management)
-8. [Message Endpoints](#message-endpoints)
-9. [Crisis Management](#crisis-management)
-10. [AI/Chatbot Endpoints](#aichatbot-endpoints)
-11. [Urgent Operations](#urgent-operations)
-12. [Socket.io Events](#socketio-events)
-13. [Examples](#examples)
+
+
+## Table of Contents## Table of Contents
+
+1. [Overview](#overview)1. [Overview](#overview)
+
+2. [Base Configuration](#base-configuration)2. [Base Configuration](#base-configuration)
+
+3. [Authentication](#authentication)3. [Authentication](#authentication)
+
+4. [Error Handling](#error-handling)4. [Error Handling](#error-handling)
+
+5. [Rate Limiting](#rate-limiting)5. [Rate Limiting](#rate-limiting)
+
+6. [Health Check](#health-check)6. [Health Check](#health-check)
+
+7. [Authentication Endpoints](#authentication-endpoints)7. [Authentication Endpoints](#authentication-endpoints)
+
+8. [User Management](#user-management)8. [User Management](#user-management)
+
+9. [Session Management](#session-management)9. [Session Management](#session-management)
+
+10. [Message System](#message-system)10. [Message System](#message-system)
+
+11. [Crisis Management](#crisis-management)11. [Crisis Management](#crisis-management)
+
+12. [AI & Chatbot](#ai--chatbot)12. [AI & Chatbot](#ai--chatbot)
+
+13. [Urgent Operations](#urgent-operations)13. [Urgent Operations](#urgent-operations)
+
+14. [Psychological Screening](#psychological-screening)14. [Psychological Screening](#psychological-screening)
+
+15. [Real-time Communication](#real-time-communication)15. [Real-time Communication](#real-time-communication)
+
+16. [Data Schemas](#data-schemas)16. [Data Schemas](#data-schemas)
+
+---
 
 ---
 
 ## Overview
 
-The Saneyar Mental Health Platform API provides endpoints for managing mental health support sessions, crisis detection, AI-powered chatbot interactions, and real-time communication between patients, peers, and counselors.
+## Overview
 
-**Base URL**: 
-- Development: `http://localhost:5000`
-- Production: `https://your-domain.com`
+The Saneyar Mental Health Platform is a comprehensive system for mental health support featuring:
 
-**API Version**: v1
+The Saneyar Mental Health Platform is a comprehensive system for mental health support featuring:- **Peer & Professional Counseling**: Real-time chat sessions between patients, peers, and counselors
+
+- **Peer & Professional Counseling**: Real-time chat sessions between patients, peers, and counselors- **Crisis Detection & Management**: AI-powered crisis detection with immediate intervention
+
+- **Crisis Detection & Management**: AI-powered crisis detection with immediate intervention- **Psychological Screening**: Standardized assessments (PHQ-9, GAD-7, GHQ)
+
+- **Psychological Screening**: Standardized assessments (PHQ-9, GAD-7, GHQ)- **AI Chatbot**: 24/7 support with advanced conversation capabilities
+
+- **AI Chatbot**: 24/7 support with advanced conversation capabilities- **Emergency Response**: Automated escalation and crisis management workflows
+
+- **Emergency Response**: Automated escalation and crisis management workflows
+
+**Base URL**: `http://localhost:5000/api`
+
+**Base URL**: `http://localhost:5000/api`
+
+### � Specialized Documentation
+
+### 📚 Specialized Documentation- **[Psychological Screening API](./psychological-screening-api-docs.md)**: Complete documentation for PHQ-9, GAD-7, GHQ assessments
+
+- **[Psychological Screening API](./psychological-screening-api-docs.md)**: Complete documentation for PHQ-9, GAD-7, GHQ assessments
+
+---
+
+---
+
+## Base Configuration
+
+## Base Configuration
+
+### Environment
+
+### Environment- **Development**: `http://localhost:5000`
+
+- **Development**: `http://localhost:5000`- **Production**: `https://api.saneyar.com`
+
+- **Production**: `https://api.saneyar.com`
+
+### Content Type
+
+### Content TypeAll requests should use `Content-Type: application/json`
+
+All requests should use `Content-Type: application/json`
+
+### CORS
+
+### CORS- Allowed Origins: `http://localhost:3000` (configurable)
+
+- Allowed Origins: `http://localhost:3000` (configurable)- Credentials: Supported
+
+- Credentials: Supported- Methods: GET, POST, PUT, DELETE, OPTIONS
+
+- Methods: GET, POST, PUT, DELETE, OPTIONS
+
+---
 
 ---
 
 ## Authentication
 
-Most endpoints require JWT authentication. Include the token in the Authorization header:
+## Authentication
+
+### JWT Token Authentication
+
+### JWT Token AuthenticationMost endpoints require JWT authentication via Bearer token:
+
+Most endpoints require JWT authentication via Bearer token:
 
 ```http
-Authorization: Bearer <jwt_token>
+
+```httpAuthorization: Bearer <jwt_token>
+
+Authorization: Bearer <jwt_token>```
+
 ```
 
 ### Token Types
-- **Access Token**: Valid for 1 hour, used for API requests
+
+### Token Types- **Access Token**: Valid for 1 hour, used for API requests
+
+- **Access Token**: Valid for 1 hour, used for API requests- **Refresh Token**: Valid for 30 days, used to obtain new access tokens
+
 - **Refresh Token**: Valid for 30 days, used to obtain new access tokens
+
+### User Roles
+
+### User Roles- `patient`: Standard users seeking support
+
+- `patient`: Standard users seeking support- `peer`: Trained peer supporters
+
+- `peer`: Trained peer supporters- `counselor`: Professional mental health counselors
+
+- `counselor`: Professional mental health counselors- `admin`: System administrators
+
+- `admin`: System administrators
+
+---
 
 ---
 
 ## Error Handling
 
-All API errors follow this standard format:
+## Error Handling
 
-```json
-{
-  "error": "Error message description",
-  "details": "Additional technical details (development only)",
-  "code": "ERROR_CODE",
-  "timestamp": "2025-09-22T10:30:00.000Z",
-  "path": "/api/endpoint"
-}
+### Standard Error Format
+
+### Standard Error Format```json
+
+```json{
+
+{  "success": false,
+
+  "success": false,  "message": "Error description",
+
+  "message": "Error description",  "error": "ERROR_CODE",
+
+  "error": "ERROR_CODE",  "details": ["Specific validation errors"]
+
+  "details": ["Specific validation errors"]}
+
+}```
+
 ```
 
-### Common HTTP Status Codes
-- `200` - Success
-- `201` - Created
-- `400` - Bad Request
-- `401` - Unauthorized
-- `403` - Forbidden
-- `404` - Not Found
-- `409` - Conflict
-- `429` - Too Many Requests
+### HTTP Status Codes
+
+### HTTP Status Codes- `200` - Success
+
+- `200` - Success- `201` - Created
+
+- `201` - Created- `400` - Bad Request / Validation Error
+
+- `400` - Bad Request / Validation Error- `401` - Unauthorized / Invalid Token
+
+- `401` - Unauthorized / Invalid Token- `403` - Forbidden / Insufficient Permissions
+
+- `403` - Forbidden / Insufficient Permissions- `404` - Resource Not Found
+
+- `404` - Resource Not Found- `429` - Rate Limit Exceeded
+
+- `429` - Rate Limit Exceeded- `500` - Internal Server Error
+
 - `500` - Internal Server Error
+
+---
 
 ---
 
 ## Rate Limiting
 
-### General API Limits
-- **100 requests per 15 minutes** per IP address
-- **Headers included in response**:
-  - `X-RateLimit-Limit`: Request limit
-  - `X-RateLimit-Remaining`: Remaining requests
-  - `X-RateLimit-Reset`: Reset time
+## Rate Limiting
 
-### Authentication Limits
-- **5 requests per 15 minutes** per IP address for login/register
+### General Limits
+
+### General Limits- **API Endpoints**: 100 requests per 15 minutes per IP
+
+- **API Endpoints**: 100 requests per 15 minutes per IP- **Authentication**: 5 requests per minute per IP
+
+- **Authentication**: 5 requests per minute per IP- **Admin Endpoints**: 200 requests per 15 minutes per IP
+
+- **Admin Endpoints**: 200 requests per 15 minutes per IP
+
+### Rate Limit Headers
+
+### Rate Limit Headers```http
+
+```httpX-RateLimit-Limit: 100
+
+X-RateLimit-Limit: 100X-RateLimit-Remaining: 95
+
+X-RateLimit-Remaining: 95X-RateLimit-Reset: 1640995200
+
+X-RateLimit-Reset: 1640995200```
+
+```
+
+---
 
 ---
 
 ## Health Check
 
-### GET /health
+## Health Check
 
-Check server health and status.
+### Server Health
 
-**Authentication**: Not required
+### Server Health**Endpoint**: `GET /health`
 
-**Request**: No parameters
+**Endpoint**: `GET /health`
 
 **Response**:
-```json
-{
-  "status": "ok",
-  "timestamp": "2025-09-22T10:30:00.000Z",
-  "version": "1.0.0",
-  "environment": "development",
-  "database": "connected",
-  "services": {
-    "mongodb": "healthy",
-    "azure_openai": "healthy",
-    "email": "healthy"
-  },
-  "uptime": 3600
-}
+
+**Response**:```json
+
+```json{
+
+{  "status": "ok",
+
+  "status": "ok",  "timestamp": "2025-09-23T08:14:15.000Z",
+
+  "timestamp": "2025-09-23T08:14:15.000Z",  "version": "1.0.0",
+
+  "version": "1.0.0",  "environment": "development"
+
+  "environment": "development"}
+
+}```
+
 ```
+
+---
 
 ---
 
 ## Authentication Endpoints
 
+## Authentication Endpoints
+
 ### POST /api/auth/register
 
-Register a new user account.
+### 1. User Registration
 
-**Authentication**: Not required  
-**Rate Limited**: 5 requests per 15 minutes
+**Endpoint**: `POST /api/auth/register`Register a new user account.
 
-**Request Body**:
-```json
+
+
+**Request Body**:**Authentication**: Not required  
+
+```json**Rate Limited**: 5 requests per 15 minutes
+
 {
-  "username": "johndoe123",
-  "email": "john.doe@example.com",
-  "password": "SecurePassword123!",
-  "role": "patient",
-  "profile": {
-    "firstName": "John",
-    "lastName": "Doe",
-    "age": 25,
-    "preferredName": "Johnny",
-    "phoneNumber": "+1234567890",
-    "emergencyContact": {
-      "name": "Jane Doe",
-      "relationship": "Sister",
-      "phone": "+1234567891"
+
+  "username": "john_doe",**Request Body**:
+
+  "email": "john@university.edu",```json
+
+  "password": "SecurePass123",{
+
+  "role": "patient",  "username": "johndoe123",
+
+  "profile": {  "email": "john.doe@example.com",
+
+    "firstName": "John",  "password": "SecurePassword123!",
+
+    "lastName": "Doe",  "role": "patient",
+
+    "dateOfBirth": "1995-05-15",  "profile": {
+
+    "phoneNumber": "+1234567890",    "firstName": "John",
+
+    "emergencyContact": {    "lastName": "Doe",
+
+      "name": "Jane Doe",    "age": 25,
+
+      "relationship": "Sister",    "preferredName": "Johnny",
+
+      "phoneNumber": "+1234567891"    "phoneNumber": "+1234567890",
+
+    }    "emergencyContact": {
+
+  }      "name": "Jane Doe",
+
+}      "relationship": "Sister",
+
+```      "phone": "+1234567891"
+
     },
-    "preferences": {
-      "language": "en",
-      "timezone": "America/New_York",
-      "notifications": {
-        "email": true,
-        "sms": false,
-        "push": true
-      }
-    }
-  },
-  "agreedToTerms": true,
-  "agreedToPrivacy": true
+
+**Success Response (201)**:    "preferences": {
+
+```json      "language": "en",
+
+{      "timezone": "America/New_York",
+
+  "success": true,      "notifications": {
+
+  "message": "User registered successfully",        "email": true,
+
+  "data": {        "sms": false,
+
+    "user": {        "push": true
+
+      "id": "615f1234567890abcdef1234",      }
+
+      "username": "john_doe",    }
+
+      "email": "john@university.edu",  },
+
+      "role": "patient",  "agreedToTerms": true,
+
+      "isActive": true,  "agreedToPrivacy": true
+
+      "createdAt": "2025-09-23T08:14:15.000Z"}
+
+    },```
+
+    "tokens": {
+
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",**Validation Rules**:
+
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",- `email`: Valid email format, unique
+
+      "expiresIn": 3600- `password`: Minimum 8 characters, must contain uppercase, lowercase, number, and special character
+
+    }- `role`: One of: `patient`, `peer`, `counselor`, `admin`
+
+  }- `age`: Must be 13 or older
+
 }
-```
 
-**Validation Rules**:
-- `email`: Valid email format, unique
-- `password`: Minimum 8 characters, must contain uppercase, lowercase, number, and special character
-- `role`: One of: `patient`, `peer`, `counselor`, `admin`
-- `age`: Must be 13 or older
+```**Success Response (201)**:
 
-**Success Response (201)**:
 ```json
-{
-  "message": "User registered successfully",
+
+### 2. User Login{
+
+**Endpoint**: `POST /api/auth/login`  "message": "User registered successfully",
+
   "user": {
-    "_id": "60f7b1234567890abcdef123",
-    "username": "johndoe123",
-    "email": "john.doe@example.com",
-    "role": "patient",
-    "profile": {
-      "firstName": "John",
-      "lastName": "Doe",
+
+**Request Body**:    "_id": "60f7b1234567890abcdef123",
+
+```json    "username": "johndoe123",
+
+{    "email": "john.doe@example.com",
+
+  "email": "john@university.edu",    "role": "patient",
+
+  "password": "SecurePass123"    "profile": {
+
+}      "firstName": "John",
+
+```      "lastName": "Doe",
+
       "age": 25,
-      "preferredName": "Johnny"
-    },
-    "isVerified": false,
-    "isOnline": false,
-    "createdAt": "2025-09-22T10:30:00.000Z",
-    "lastLoginAt": null
-  },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "verificationEmail": "sent"
-}
-```
 
-**Error Responses**:
-```json
-// 400 - Validation Error
-{
-  "error": "Validation failed",
-  "details": {
-    "email": "Email already exists",
-    "password": "Password must contain at least one uppercase letter"
+**Success Response (200)**:      "preferredName": "Johnny"
+
+```json    },
+
+{    "isVerified": false,
+
+  "success": true,    "isOnline": false,
+
+  "message": "Login successful",    "createdAt": "2025-09-22T10:30:00.000Z",
+
+  "data": {    "lastLoginAt": null
+
+    "user": {  },
+
+      "id": "615f1234567890abcdef1234",  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+      "username": "john_doe",  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+      "email": "john@university.edu",  "verificationEmail": "sent"
+
+      "role": "patient",}
+
+      "profile": {```
+
+        "firstName": "John",
+
+        "lastName": "Doe"**Error Responses**:
+
+      },```json
+
+      "isActive": true,// 400 - Validation Error
+
+      "lastLogin": "2025-09-23T08:14:15.000Z"{
+
+    },  "error": "Validation failed",
+
+    "tokens": {  "details": {
+
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",    "email": "Email already exists",
+
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",    "password": "Password must contain at least one uppercase letter"
+
+      "expiresIn": 3600  }
+
+    }}
+
   }
-}
 
-// 409 - Conflict
-{
+}// 409 - Conflict
+
+```{
+
   "error": "User already exists",
-  "details": "An account with this email already exists"
-}
+
+### 3. Refresh Token  "details": "An account with this email already exists"
+
+**Endpoint**: `POST /api/auth/refresh`}
+
 ```
-
----
-
-### POST /api/auth/login
-
-Authenticate user and obtain access token.
-
-**Authentication**: Not required  
-**Rate Limited**: 5 requests per 15 minutes
 
 **Request Body**:
-```json
+
+```json---
+
 {
-  "email": "john.doe@example.com",
-  "password": "SecurePassword123!",
-  "rememberMe": true
+
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."### POST /api/auth/login
+
 }
+
+```Authenticate user and obtain access token.
+
+
+
+**Success Response (200)**:**Authentication**: Not required  
+
+```json**Rate Limited**: 5 requests per 15 minutes
+
+{
+
+  "success": true,**Request Body**:
+
+  "message": "Token refreshed successfully",```json
+
+  "data": {{
+
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",  "email": "john.doe@example.com",
+
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",  "password": "SecurePassword123!",
+
+    "expiresIn": 3600  "rememberMe": true
+
+  }}
+
+}```
+
 ```
 
 **Success Response (200)**:
-```json
-{
+
+### 4. Logout```json
+
+**Endpoint**: `POST /api/auth/logout`{
+
   "message": "Login successful",
-  "user": {
+
+**Headers**: `Authorization: Bearer <token>`  "user": {
+
     "_id": "60f7b1234567890abcdef123",
-    "username": "johndoe123",
-    "email": "john.doe@example.com",
-    "role": "patient",
-    "profile": {
-      "firstName": "John",
-      "lastName": "Doe",
-      "preferredName": "Johnny"
+
+**Success Response (200)**:    "username": "johndoe123",
+
+```json    "email": "john.doe@example.com",
+
+{    "role": "patient",
+
+  "success": true,    "profile": {
+
+  "message": "Logout successful"      "firstName": "John",
+
+}      "lastName": "Doe",
+
+```      "preferredName": "Johnny"
+
     },
-    "isOnline": true,
-    "lastLoginAt": "2025-09-22T10:30:00.000Z",
+
+### 5. Get Current User    "isOnline": true,
+
+**Endpoint**: `GET /api/auth/me`    "lastLoginAt": "2025-09-22T10:30:00.000Z",
+
     "preferences": {
-      "language": "en",
+
+**Headers**: `Authorization: Bearer <token>`      "language": "en",
+
       "timezone": "America/New_York"
-    }
-  },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expiresIn": 3600
-}
+
+**Success Response (200)**:    }
+
+```json  },
+
+{  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+  "success": true,  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+  "data": {  "expiresIn": 3600
+
+    "user": {}
+
+      "id": "615f1234567890abcdef1234",```
+
+      "username": "john_doe",
+
+      "email": "john@university.edu",**Error Responses**:
+
+      "role": "patient",```json
+
+      "profile": {// 401 - Invalid Credentials
+
+        "firstName": "John",{
+
+        "lastName": "Doe",  "error": "Invalid credentials",
+
+        "dateOfBirth": "1995-05-15",  "details": "Email or password is incorrect"
+
+        "phoneNumber": "+1234567890"}
+
+      },
+
+      "isActive": true,// 423 - Account Locked
+
+      "isOnline": true,{
+
+      "lastLogin": "2025-09-23T08:14:15.000Z",  "error": "Account temporarily locked",
+
+      "createdAt": "2025-09-23T08:00:00.000Z"  "details": "Too many failed login attempts. Try again in 30 minutes.",
+
+    }  "retryAfter": 1800
+
+  }}
+
+}```
+
 ```
 
-**Error Responses**:
-```json
-// 401 - Invalid Credentials
-{
-  "error": "Invalid credentials",
-  "details": "Email or password is incorrect"
-}
-
-// 423 - Account Locked
-{
-  "error": "Account temporarily locked",
-  "details": "Too many failed login attempts. Try again in 30 minutes.",
-  "retryAfter": 1800
-}
-```
+---
 
 ---
 
 ### POST /api/auth/logout
 
+## User Management
+
 Logout user and invalidate tokens.
 
-**Authentication**: Required
+### 1. Update Profile
 
-**Request Body**:
+**Endpoint**: `PUT /api/auth/profile`**Authentication**: Required
+
+
+
+**Headers**: `Authorization: Bearer <token>`**Request Body**:
+
 ```json
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+**Request Body**:{
+
+```json  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+{}
+
+  "profile": {```
+
+    "firstName": "John",
+
+    "lastName": "Smith",**Success Response (200)**:
+
+    "phoneNumber": "+1234567890",```json
+
+    "bio": "Mental health advocate",{
+
+    "preferences": {  "message": "Logout successful"
+
+      "notifications": true,}
+
+      "emailUpdates": false```
+
+    }
+
+  }---
+
 }
-```
 
-**Success Response (200)**:
-```json
-{
-  "message": "Logout successful"
-}
-```
+```### POST /api/auth/refresh
 
----
 
-### POST /api/auth/refresh
 
-Refresh access token using refresh token.
+### 2. Change PasswordRefresh access token using refresh token.
+
+**Endpoint**: `PUT /api/auth/password`
 
 **Authentication**: Not required
 
-**Request Body**:
-```json
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
+**Headers**: `Authorization: Bearer <token>`
 
-**Success Response (200)**:
+**Request Body**:
+
+**Request Body**:```json
+
+```json{
+
+{  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+  "currentPassword": "oldPassword123",}
+
+  "newPassword": "newSecurePass456"```
+
+}
+
+```**Success Response (200)**:
+
 ```json
-{
+
+---{
+
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+## Session Management  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
   "expiresIn": 3600
-}
-```
 
----
+### 1. Create Support Session}
 
-### POST /api/auth/forgot-password
+**Endpoint**: `POST /api/sessions````
 
-Request password reset email.
 
-**Authentication**: Not required
 
-**Request Body**:
+**Headers**: `Authorization: Bearer <token>`---
+
+
+
+**Request Body**:### POST /api/auth/forgot-password
+
 ```json
-{
-  "email": "john.doe@example.com"
-}
+
+{Request password reset email.
+
+  "type": "peer_support",
+
+  "title": "Anxiety Support Request",**Authentication**: Not required
+
+  "description": "Looking for help with anxiety management",
+
+  "urgencyLevel": "medium",**Request Body**:
+
+  "preferredHelperType": "peer",```json
+
+  "tags": ["anxiety", "stress", "academic"]{
+
+}  "email": "john.doe@example.com"
+
+```}
+
 ```
-
-**Success Response (200)**:
-```json
-{
-  "message": "Password reset email sent",
-  "details": "If an account exists with this email, you will receive reset instructions"
-}
-```
-
----
-
-### POST /api/auth/reset-password
-
-Reset password using reset token.
-
-**Authentication**: Not required
-
-**Request Body**:
-```json
-{
-  "token": "reset_token_from_email",
-  "newPassword": "NewSecurePassword123!",
-  "confirmPassword": "NewSecurePassword123!"
-}
-```
-
-**Success Response (200)**:
-```json
-{
-  "message": "Password reset successful"
-}
-```
-
-### POST /api/auth/anonymous
-
-Create an anonymous session for guest users.
-
-**Authentication**: Not required
-
-**Request Body**:
-```json
-{
-  "sessionId": "optional_session_id"
-}
-```
-
-**Success Response (200)**:
-```json
-{
-  "success": true,
-  "message": "Anonymous session created",
-  "sessionId": "generated_session_id",
-  "token": "jwt_token_for_anonymous_user"
-}
-```
-
-### POST /api/auth/verify
-
-Verify JWT token validity.
-
-**Authentication**: Required
-
-**Headers**:
-```
-Authorization: Bearer <jwt_token>
-```
-
-**Success Response (200)**:
-```json
-{
-  "valid": true,
-  "user": {
-    "id": "user_id",
-    "username": "john_doe",
-    "email": "john@example.com",
-    "role": "user"
-  }
-}
-```
-
----
-
-## Session Management
-
-### POST /api/sessions/create
-
-Create a new support session.
-
-**Authentication**: Required
-
-**Request Body**:
-```json
-{
-  "helperType": "peer",
-  "severity": "medium", 
-  "title": "Job Interview Anxiety Support",
-  "description": "I'm feeling anxious about an upcoming job interview and need someone to talk to"
-}
-```
-
-**Field Descriptions**:
-- `helperType`: `peer` | `counselor` | `chatbot`
-- `severity`: `mild` | `moderate` | `severe` | `critical`
-- `title`: Session title (optional)
-- `description`: Description of what support is needed
 
 **Success Response (201)**:
-```json
-{
-  "message": "Session created successfully",
-  "session": {
-    "_id": "60f7b1234567890abcdef124",
-    "patientId": "60f7b1234567890abcdef123",
-    "helperId": null,
-    "helperType": "peer",
-    "status": "waiting",
-    "severity": "moderate",
-    "title": "Job Interview Anxiety Support",
-    "description": "I'm feeling anxious about an upcoming job interview",
-    "createdAt": "2025-09-22T10:30:00.000Z",
-    "startedAt": null
-  }
-}
+
+```json**Success Response (200)**:
+
+{```json
+
+  "success": true,{
+
+  "message": "Session created successfully",  "message": "Password reset email sent",
+
+  "data": {  "details": "If an account exists with this email, you will receive reset instructions"
+
+    "session": {}
+
+      "id": "615f1234567890abcdef1235",```
+
+      "type": "peer_support",
+
+      "title": "Anxiety Support Request",---
+
+      "description": "Looking for help with anxiety management",
+
+      "status": "pending",### POST /api/auth/reset-password
+
+      "urgencyLevel": "medium",
+
+      "patientId": "615f1234567890abcdef1234",Reset password using reset token.
+
+      "tags": ["anxiety", "stress", "academic"],
+
+      "createdAt": "2025-09-23T08:14:15.000Z",**Authentication**: Not required
+
+      "estimatedWaitTime": 300
+
+    }**Request Body**:
+
+  }```json
+
+}{
+
+```  "token": "reset_token_from_email",
+
+  "newPassword": "NewSecurePassword123!",
+
+### 2. Get Available Sessions  "confirmPassword": "NewSecurePassword123!"
+
+**Endpoint**: `GET /api/sessions/available`}
+
 ```
 
+**Headers**: `Authorization: Bearer <token>`
+
+**Success Response (200)**:
+
+**Query Parameters**:```json
+
+- `type`: Session type filter{
+
+- `urgencyLevel`: Urgency filter  "message": "Password reset successful"
+
+- `limit`: Number of results (default: 10)}
+
+```
+
+**Success Response (200)**:
+
+```json### POST /api/auth/anonymous
+
+{
+
+  "success": true,Create an anonymous session for guest users.
+
+  "data": {
+
+    "sessions": [**Authentication**: Not required
+
+      {
+
+        "id": "615f1234567890abcdef1235",**Request Body**:
+
+        "type": "peer_support",```json
+
+        "title": "Anxiety Support Request",{
+
+        "urgencyLevel": "medium",  "sessionId": "optional_session_id"
+
+        "tags": ["anxiety", "stress"],}
+
+        "waitTime": 180,```
+
+        "createdAt": "2025-09-23T08:14:15.000Z"
+
+      }**Success Response (200)**:
+
+    ],```json
+
+    "count": 1{
+
+  }  "success": true,
+
+}  "message": "Anonymous session created",
+
+```  "sessionId": "generated_session_id",
+
+  "token": "jwt_token_for_anonymous_user"
+
+### 3. Accept Session}
+
+**Endpoint**: `POST /api/sessions/:sessionId/accept````
+
+
+
+**Headers**: `Authorization: Bearer <token>`### POST /api/auth/verify
+
+
+
+**Success Response (200)**:Verify JWT token validity.
+
+```json
+
+{**Authentication**: Required
+
+  "success": true,
+
+  "message": "Session accepted successfully",**Headers**:
+
+  "data": {```
+
+    "session": {Authorization: Bearer <jwt_token>
+
+      "id": "615f1234567890abcdef1235",```
+
+      "status": "active",
+
+      "helperId": "615f1234567890abcdef1237",**Success Response (200)**:
+
+      "acceptedAt": "2025-09-23T08:20:15.000Z"```json
+
+    }{
+
+  }  "valid": true,
+
+}  "user": {
+
+```    "id": "user_id",
+
+    "username": "john_doe",
+
+### 4. Decline Session    "email": "john@example.com",
+
+**Endpoint**: `POST /api/sessions/:sessionId/decline`    "role": "user"
+
+  }
+
+**Headers**: `Authorization: Bearer <token>`}
+
+```
+
+**Request Body**:
+
+```json---
+
+{
+
+  "reason": "Not available at the moment"## Session Management
+
+}
+
+```### POST /api/sessions/create
+
+
+
+### 5. Get User SessionsCreate a new support session.
+
+**Endpoint**: `GET /api/sessions/user`
+
+**Authentication**: Required
+
+**Headers**: `Authorization: Bearer <token>`
+
+**Request Body**:
+
+**Query Parameters**:```json
+
+- `status`: Filter by status{
+
+- `type`: Filter by session type  "helperType": "peer",
+
+- `limit`: Number of results  "severity": "medium", 
+
+- `page`: Page number  "title": "Job Interview Anxiety Support",
+
+  "description": "I'm feeling anxious about an upcoming job interview and need someone to talk to"
+
+**Success Response (200)**:}
+
+```json```
+
+{
+
+  "success": true,**Field Descriptions**:
+
+  "data": {- `helperType`: `peer` | `counselor` | `chatbot`
+
+    "sessions": [- `severity`: `mild` | `moderate` | `severe` | `critical`
+
+      {- `title`: Session title (optional)
+
+        "id": "615f1234567890abcdef1235",- `description`: Description of what support is needed
+
+        "type": "peer_support",
+
+        "title": "Anxiety Support Request",**Success Response (201)**:
+
+        "status": "completed",```json
+
+        "duration": 1800,{
+
+        "rating": 5,  "message": "Session created successfully",
+
+        "createdAt": "2025-09-23T08:14:15.000Z",  "session": {
+
+        "completedAt": "2025-09-23T08:44:15.000Z"    "_id": "60f7b1234567890abcdef124",
+
+      }    "patientId": "60f7b1234567890abcdef123",
+
+    ],    "helperId": null,
+
+    "pagination": {    "helperType": "peer",
+
+      "current": 1,    "status": "waiting",
+
+      "total": 5,    "severity": "moderate",
+
+      "count": 1    "title": "Job Interview Anxiety Support",
+
+    }    "description": "I'm feeling anxious about an upcoming job interview",
+
+  }    "createdAt": "2025-09-22T10:30:00.000Z",
+
+}    "startedAt": null
+
+```  }
+
+}
+
+### 6. End Session```
+
+**Endpoint**: `POST /api/sessions/:sessionId/end`
+
 ---
+
+**Headers**: `Authorization: Bearer <token>`
 
 ### GET /api/sessions/my-sessions
 
-Get user's sessions with filtering and pagination.
+**Request Body**:
 
-**Authentication**: Required
+```jsonGet user's sessions with filtering and pagination.
 
-**Query Parameters**:
-- `status`: Filter by status (`waiting`, `active`, `closed`, `escalated`)
-- `helperType`: Filter by helper type (`peer`, `counselor`, `chatbot`)
+{
+
+  "rating": 5,**Authentication**: Required
+
+  "feedback": "Very helpful session, thank you!",
+
+  "tags": ["resolved", "helpful"]**Query Parameters**:
+
+}- `status`: Filter by status (`waiting`, `active`, `closed`, `escalated`)
+
+```- `helperType`: Filter by helper type (`peer`, `counselor`, `chatbot`)
+
 - `severity`: Filter by severity (`low`, `medium`, `high`, `critical`)
-- `limit`: Number of sessions per page (default: 20, max: 100)
+
+---- `limit`: Number of sessions per page (default: 20, max: 100)
+
 - `page`: Page number (default: 1)
-- `sort`: Sort field (`createdAt`, `updatedAt`, `status`)
+
+## Message System- `sort`: Sort field (`createdAt`, `updatedAt`, `status`)
+
 - `order`: Sort order (`asc`, `desc`)
-- `dateFrom`: Start date filter (ISO string)
-- `dateTo`: End date filter (ISO string)
 
-**Example Request**:
+### 1. Send Message- `dateFrom`: Start date filter (ISO string)
+
+**Endpoint**: `POST /api/messages`- `dateTo`: End date filter (ISO string)
+
+
+
+**Headers**: `Authorization: Bearer <token>`**Example Request**:
+
 ```http
-GET /api/sessions/my-sessions?status=active&limit=10&page=1&sort=createdAt&order=desc
-```
 
-**Success Response (200)**:
-```json
+**Request Body**:GET /api/sessions/my-sessions?status=active&limit=10&page=1&sort=createdAt&order=desc
+
+```json```
+
 {
-  "sessions": [
-    {
-      "_id": "60f7b1234567890abcdef124",
-      "patientId": {
-        "_id": "60f7b1234567890abcdef123",
+
+  "sessionId": "615f1234567890abcdef1235",**Success Response (200)**:
+
+  "content": {```json
+
+    "text": "Hello, I'm struggling with anxiety about my upcoming exams.",{
+
+    "type": "text"  "sessions": [
+
+  },    {
+
+  "isEncrypted": false      "_id": "60f7b1234567890abcdef124",
+
+}      "patientId": {
+
+```        "_id": "60f7b1234567890abcdef123",
+
         "username": "johndoe123",
-        "profile": {
-          "firstName": "John",
-          "preferredName": "Johnny"
-        }
-      },
-      "helperId": {
-        "_id": "60f7b1234567890abcdef125",
-        "username": "helper_sarah",
-        "profile": {
-          "firstName": "Sarah",
-          "specializations": ["anxiety", "career"]
-        }
-      },
-      "status": "active",
-      "severity": "medium",
-      "helperType": "peer",
-      "description": "I'm feeling anxious about an upcoming job interview",
-      "createdAt": "2025-09-22T10:30:00.000Z",
-      "startedAt": "2025-09-22T10:35:00.000Z",
-      "lastActivity": "2025-09-22T11:00:00.000Z",
-      "messageCount": 12,
+
+**Success Response (201)**:        "profile": {
+
+```json          "firstName": "John",
+
+{          "preferredName": "Johnny"
+
+  "success": true,        }
+
+  "message": "Message sent successfully",      },
+
+  "data": {      "helperId": {
+
+    "message": {        "_id": "60f7b1234567890abcdef125",
+
+      "id": "615f1234567890abcdef1236",        "username": "helper_sarah",
+
+      "sessionId": "615f1234567890abcdef1235",        "profile": {
+
+      "senderId": "615f1234567890abcdef1234",          "firstName": "Sarah",
+
+      "content": {          "specializations": ["anxiety", "career"]
+
+        "text": "Hello, I'm struggling with anxiety about my upcoming exams.",        }
+
+        "type": "text"      },
+
+      },      "status": "active",
+
+      "timestamp": "2025-09-23T08:14:15.000Z",      "severity": "medium",
+
+      "isEncrypted": false,      "helperType": "peer",
+
+      "messageNumber": 1      "description": "I'm feeling anxious about an upcoming job interview",
+
+    }      "createdAt": "2025-09-22T10:30:00.000Z",
+
+  }      "startedAt": "2025-09-22T10:35:00.000Z",
+
+}      "lastActivity": "2025-09-22T11:00:00.000Z",
+
+```      "messageCount": 12,
+
       "duration": 1500,
-      "tags": ["anxiety", "career", "interview"]
-    }
+
+### 2. Get Session Messages      "tags": ["anxiety", "career", "interview"]
+
+**Endpoint**: `GET /api/messages/session/:sessionId`    }
+
   ],
-  "pagination": {
+
+**Headers**: `Authorization: Bearer <token>`  "pagination": {
+
     "currentPage": 1,
-    "totalPages": 3,
-    "totalSessions": 25,
-    "hasNextPage": true,
-    "hasPrevPage": false
+
+**Query Parameters**:    "totalPages": 3,
+
+- `limit`: Number of messages (default: 50)    "totalSessions": 25,
+
+- `before`: Get messages before this message ID    "hasNextPage": true,
+
+- `after`: Get messages after this message ID    "hasPrevPage": false
+
   },
-  "summary": {
-    "total": 25,
-    "active": 2,
-    "waiting": 1,
-    "closed": 22
-  }
-}
-```
 
----
+**Success Response (200)**:  "summary": {
 
-### GET /api/sessions/:sessionId
+```json    "total": 25,
 
-Get detailed information about a specific session.
+{    "active": 2,
 
-**Authentication**: Required  
-**Authorization**: User must be participant in session or have counselor/admin role
+  "success": true,    "waiting": 1,
 
-**Success Response (200)**:
-```json
-{
-  "session": {
-    "_id": "60f7b1234567890abcdef124",
-    "patientId": {
-      "_id": "60f7b1234567890abcdef123",
-      "username": "johndoe123",
-      "profile": {
+  "data": {    "closed": 22
+
+    "messages": [  }
+
+      {}
+
+        "id": "615f1234567890abcdef1236",```
+
+        "senderId": "615f1234567890abcdef1234",
+
+        "senderInfo": {---
+
+          "username": "john_doe",
+
+          "role": "patient"### GET /api/sessions/:sessionId
+
+        },
+
+        "content": {Get detailed information about a specific session.
+
+          "text": "Hello, I'm struggling with anxiety.",
+
+          "type": "text"**Authentication**: Required  
+
+        },**Authorization**: User must be participant in session or have counselor/admin role
+
+        "timestamp": "2025-09-23T08:14:15.000Z",
+
+        "messageNumber": 1,**Success Response (200)**:
+
+        "isEdited": false```json
+
+      }{
+
+    ],  "session": {
+
+    "count": 1,    "_id": "60f7b1234567890abcdef124",
+
+    "hasMore": false    "patientId": {
+
+  }      "_id": "60f7b1234567890abcdef123",
+
+}      "username": "johndoe123",
+
+```      "profile": {
+
         "firstName": "John",
-        "preferredName": "Johnny"
-      }
+
+### 3. Update Message        "preferredName": "Johnny"
+
+**Endpoint**: `PUT /api/messages/:messageId`      }
+
     },
-    "helperId": {
+
+**Headers**: `Authorization: Bearer <token>`    "helperId": {
+
       "_id": "60f7b1234567890abcdef125",
-      "username": "helper_sarah",
-      "profile": {
-        "firstName": "Sarah",
-        "specializations": ["anxiety", "career"],
-        "rating": 4.8,
-        "sessionsCompleted": 156
-      }
-    },
-    "status": "active",
+
+**Request Body**:      "username": "helper_sarah",
+
+```json      "profile": {
+
+{        "firstName": "Sarah",
+
+  "content": {        "specializations": ["anxiety", "career"],
+
+    "text": "Hello, I'm struggling with severe anxiety about my upcoming exams.",        "rating": 4.8,
+
+    "type": "text"        "sessionsCompleted": 156
+
+  }      }
+
+}    },
+
+```    "status": "active",
+
     "severity": "medium",
-    "helperType": "peer",
-    "description": "I'm feeling anxious about an upcoming job interview",
+
+### 4. Delete Message    "helperType": "peer",
+
+**Endpoint**: `DELETE /api/messages/:messageId`    "description": "I'm feeling anxious about an upcoming job interview",
+
     "isAnonymous": false,
-    "createdAt": "2025-09-22T10:30:00.000Z",
+
+**Headers**: `Authorization: Bearer <token>`    "createdAt": "2025-09-22T10:30:00.000Z",
+
     "startedAt": "2025-09-22T10:35:00.000Z",
-    "endedAt": null,
-    "duration": 1500,
-    "messageCount": 12,
-    "lastActivity": "2025-09-22T11:00:00.000Z",
-    "rating": null,
-    "feedback": null,
-    "sessionNotes": "User is articulate and responding well to peer support techniques",
+
+**Success Response (200)**:    "endedAt": null,
+
+```json    "duration": 1500,
+
+{    "messageCount": 12,
+
+  "success": true,    "lastActivity": "2025-09-22T11:00:00.000Z",
+
+  "message": "Message deleted successfully"    "rating": null,
+
+}    "feedback": null,
+
+```    "sessionNotes": "User is articulate and responding well to peer support techniques",
+
     "tags": ["anxiety", "career", "interview"],
-    "crisisFlags": [],
+
+---    "crisisFlags": [],
+
     "escalationHistory": [],
-    "resources": [
+
+## Crisis Management    "resources": [
+
       {
-        "title": "Interview Anxiety Tips",
-        "url": "https://example.com/interview-tips",
+
+### 1. Create Crisis Alert        "title": "Interview Anxiety Tips",
+
+**Endpoint**: `POST /api/crisis`        "url": "https://example.com/interview-tips",
+
         "type": "educational"
-      }
+
+**Headers**: `Authorization: Bearer <token>`      }
+
     ]
-  },
-  "recentMessages": [
-    {
-      "_id": "60f7b1234567890abcdef126",
-      "message": "Thank you for sharing that with me. It's completely normal to feel anxious before interviews.",
-      "senderId": "60f7b1234567890abcdef125",
-      "senderRole": "peer",
-      "createdAt": "2025-09-22T11:00:00.000Z"
-    }
-  ]
+
+**Request Body**:  },
+
+```json  "recentMessages": [
+
+{    {
+
+  "severity": "high",      "_id": "60f7b1234567890abcdef126",
+
+  "description": "User expressing suicidal thoughts",      "message": "Thank you for sharing that with me. It's completely normal to feel anxious before interviews.",
+
+  "triggerContent": {      "senderId": "60f7b1234567890abcdef125",
+
+    "text": "I don't want to live anymore",      "senderRole": "peer",
+
+    "messageId": "615f1234567890abcdef1236",      "createdAt": "2025-09-22T11:00:00.000Z"
+
+    "sessionId": "615f1234567890abcdef1235"    }
+
+  },  ]
+
+  "detectionMethod": "keyword_analysis",}
+
+  "immediateAction": "escalate_to_counselor"```
+
 }
-```
 
----
+```---
 
-### PUT /api/sessions/:sessionId
 
-Update session details (status, rating, feedback, etc.).
 
-**Authentication**: Required  
-**Authorization**: User must be participant or have counselor/admin role
+**Success Response (201)**:### PUT /api/sessions/:sessionId
 
-**Request Body**:
 ```json
-{
-  "status": "closed",
-  "rating": 5,
-  "feedback": "Sarah was incredibly helpful and understanding. I feel much more confident about my interview now.",
-  "sessionNotes": "Successful peer support session. User gained confidence and coping strategies.",
-  "tags": ["anxiety", "career", "interview", "resolved"]
-}
-```
 
-**Success Response (200)**:
-```json
+{Update session details (status, rating, feedback, etc.).
+
+  "success": true,
+
+  "message": "Crisis alert created successfully",**Authentication**: Required  
+
+  "data": {**Authorization**: User must be participant or have counselor/admin role
+
+    "alert": {
+
+      "id": "615f1234567890abcdef1237",**Request Body**:
+
+      "userId": "615f1234567890abcdef1234",```json
+
+      "severity": "high",{
+
+      "status": "active",  "status": "closed",
+
+      "description": "User expressing suicidal thoughts",  "rating": 5,
+
+      "detectionMethod": "keyword_analysis",  "feedback": "Sarah was incredibly helpful and understanding. I feel much more confident about my interview now.",
+
+      "createdAt": "2025-09-23T08:14:15.000Z",  "sessionNotes": "Successful peer support session. User gained confidence and coping strategies.",
+
+      "escalationLevel": 2,  "tags": ["anxiety", "career", "interview", "resolved"]
+
+      "assignedCounselor": "615f1234567890abcdef1238"}
+
+    }```
+
+  }
+
+}**Success Response (200)**:
+
+``````json
+
 {
-  "message": "Session updated successfully",
-  "session": {
+
+### 2. Get Crisis Alerts  "message": "Session updated successfully",
+
+**Endpoint**: `GET /api/crisis`  "session": {
+
     "_id": "60f7b1234567890abcdef124",
-    "status": "closed",
+
+**Headers**: `Authorization: Bearer <token>` (Admin/Counselor only)    "status": "closed",
+
     "rating": 5,
-    "feedback": "Sarah was incredibly helpful and understanding...",
-    "endedAt": "2025-09-22T11:30:00.000Z",
-    "duration": 3600
-  }
-}
-```
 
----
+**Query Parameters**:    "feedback": "Sarah was incredibly helpful and understanding...",
 
-### GET /api/sessions/available
+- `severity`: Filter by severity level    "endedAt": "2025-09-22T11:30:00.000Z",
 
-Get available sessions waiting for helpers to accept.
+- `status`: Filter by alert status    "duration": 3600
 
-**Authentication**: Required  
-**Authorization**: User must have peer, counselor, or admin role
+- `userId`: Filter by specific user  }
 
-**Query Parameters**:
-- `helperType`: Filter by helper type (`peer`, `counselor`) 
-- `severity`: Filter by severity (`mild`, `moderate`, `severe`, `critical`)
-- `limit`: Number of sessions to return (default: 10, max: 50)
+- `limit`: Number of results}
 
-**Example Request**:
-```http
-GET /api/sessions/available?helperType=peer&severity=moderate&limit=5
 ```
 
 **Success Response (200)**:
-```json
+
+```json---
+
 {
-  "sessions": [
-    {
-      "_id": "60f7b1234567890abcdef124",
-      "patientId": {
+
+  "success": true,### GET /api/sessions/available
+
+  "data": {
+
+    "alerts": [Get available sessions waiting for helpers to accept.
+
+      {
+
+        "id": "615f1234567890abcdef1237",**Authentication**: Required  
+
+        "user": {**Authorization**: User must have peer, counselor, or admin role
+
+          "id": "615f1234567890abcdef1234",
+
+          "username": "john_doe",**Query Parameters**:
+
+          "email": "john@university.edu"- `helperType`: Filter by helper type (`peer`, `counselor`) 
+
+        },- `severity`: Filter by severity (`mild`, `moderate`, `severe`, `critical`)
+
+        "severity": "high",- `limit`: Number of sessions to return (default: 10, max: 50)
+
+        "status": "active",
+
+        "description": "User expressing suicidal thoughts",**Example Request**:
+
+        "createdAt": "2025-09-23T08:14:15.000Z",```http
+
+        "assignedCounselor": {GET /api/sessions/available?helperType=peer&severity=moderate&limit=5
+
+          "id": "615f1234567890abcdef1238",```
+
+          "name": "Dr. Smith"
+
+        }**Success Response (200)**:
+
+      }```json
+
+    ],{
+
+    "count": 1  "sessions": [
+
+  }    {
+
+}      "_id": "60f7b1234567890abcdef124",
+
+```      "patientId": {
+
         "_id": "60f7b1234567890abcdef123",
-        "username": "johndoe123",
-        "profile": {
+
+### 3. Update Crisis Alert        "username": "johndoe123",
+
+**Endpoint**: `PUT /api/crisis/:alertId`        "profile": {
+
           "firstName": "John",
-          "preferredName": "Johnny"
+
+**Headers**: `Authorization: Bearer <token>` (Admin/Counselor only)          "preferredName": "Johnny"
+
         }
-      },
-      "helperType": "peer",
-      "severity": "moderate",
-      "status": "waiting",
-      "title": "Job Interview Anxiety Support",
-      "description": "I'm feeling anxious about an upcoming job interview and need someone to talk to",
-      "createdAt": "2025-09-22T10:30:00.000Z",
-      "waitingMinutes": 15
-    },
+
+**Request Body**:      },
+
+```json      "helperType": "peer",
+
+{      "severity": "moderate",
+
+  "status": "resolved",      "status": "waiting",
+
+  "resolution": "User connected with crisis counselor, safety plan established",      "title": "Job Interview Anxiety Support",
+
+  "followUpRequired": true,      "description": "I'm feeling anxious about an upcoming job interview and need someone to talk to",
+
+  "followUpDate": "2025-09-24T08:14:15.000Z"      "createdAt": "2025-09-22T10:30:00.000Z",
+
+}      "waitingMinutes": 15
+
+```    },
+
     {
-      "_id": "60f7b1234567890abcdef125",
-      "patientId": {
+
+### 4. Get Crisis Statistics      "_id": "60f7b1234567890abcdef125",
+
+**Endpoint**: `GET /api/crisis/stats`      "patientId": {
+
         "_id": "60f7b1234567890abcdef126",
-        "username": "user456",
+
+**Headers**: `Authorization: Bearer <token>` (Admin only)        "username": "user456",
+
         "profile": {
-          "firstName": "Maria",
-          "preferredName": "Maria"
-        }
-      },
-      "helperType": "peer", 
-      "severity": "mild",
-      "status": "waiting",
-      "title": "Daily stress management",
-      "description": "Looking for someone to talk through daily stressors",
-      "createdAt": "2025-09-22T10:45:00.000Z",
-      "waitingMinutes": 0
-    }
-  ],
-  "totalWaiting": 2,
-  "instructions": {
-    "joinEndpoint": "POST /api/sessions/{sessionId}/accept",
-    "note": "Use the accept endpoint to take responsibility as the session helper"
-  }
+
+**Success Response (200)**:          "firstName": "Maria",
+
+```json          "preferredName": "Maria"
+
+{        }
+
+  "success": true,      },
+
+  "data": {      "helperType": "peer", 
+
+    "totalAlerts": 45,      "severity": "mild",
+
+    "activeAlerts": 3,      "status": "waiting",
+
+    "resolvedAlerts": 42,      "title": "Daily stress management",
+
+    "severityBreakdown": {      "description": "Looking for someone to talk through daily stressors",
+
+      "low": 15,      "createdAt": "2025-09-22T10:45:00.000Z",
+
+      "medium": 20,      "waitingMinutes": 0
+
+      "high": 8,    }
+
+      "critical": 2  ],
+
+    },  "totalWaiting": 2,
+
+    "averageResponseTime": 180,  "instructions": {
+
+    "trendsLast30Days": [    "joinEndpoint": "POST /api/sessions/{sessionId}/accept",
+
+      {    "note": "Use the accept endpoint to take responsibility as the session helper"
+
+        "date": "2025-09-23",  }
+
+        "count": 2}
+
+      }```
+
+    ]
+
+  }---
+
 }
-```
 
----
+```### POST /api/sessions/:sessionId/accept
 
-### POST /api/sessions/:sessionId/accept
 
-Accept a waiting session as a helper (counselor/peer).
 
-**Authentication**: Required  
+---Accept a waiting session as a helper (counselor/peer).
+
+
+
+## AI & Chatbot**Authentication**: Required  
+
 **Authorization**: User must have peer, counselor, or admin role
 
-**Request Body**:
+### 1. Start AI Chat Session
+
+**Endpoint**: `POST /api/ai/chat`**Request Body**:
+
 ```json
-{
+
+**Headers**: `Authorization: Bearer <token>`{
+
   "message": "Hi! I'm here to help and support you through whatever you're experiencing. How are you feeling right now?"
-}
-```
 
-**Field Descriptions**:
-- `message`: Optional welcome message to send to the patient
+**Request Body**:}
 
-**Success Response (200)**:
-```json
+```json```
+
 {
-  "message": "Session accepted successfully",
+
+  "message": "I'm feeling overwhelmed with my studies",**Field Descriptions**:
+
+  "context": {- `message`: Optional welcome message to send to the patient
+
+    "userMood": "anxious",
+
+    "previousTopics": ["academic_stress", "time_management"]**Success Response (200)**:
+
+  }```json
+
+}{
+
+```  "message": "Session accepted successfully",
+
   "session": {
-    "_id": "60f7b1234567890abcdef124",
-    "patientId": {
-      "_id": "60f7b1234567890abcdef123",
-      "username": "johndoe123",
-      "profile": {
-        "firstName": "John",
-        "preferredName": "Johnny"
-      }
-    },
-    "helperId": {
-      "_id": "60f7b1234567890abcdef125",
-      "username": "helper_sarah",
-      "profile": {
-        "firstName": "Sarah"
-      },
-      "role": "peer"
-    },
-    "helperType": "peer",
-    "status": "active",
-    "severity": "moderate",
+
+**Success Response (200)**:    "_id": "60f7b1234567890abcdef124",
+
+```json    "patientId": {
+
+{      "_id": "60f7b1234567890abcdef123",
+
+  "success": true,      "username": "johndoe123",
+
+  "data": {      "profile": {
+
+    "response": {        "firstName": "John",
+
+      "text": "I understand you're feeling overwhelmed with your studies. That's a common experience, and it's important to acknowledge these feelings. Can you tell me more about what specific aspects of your studies are causing you the most stress?",        "preferredName": "Johnny"
+
+      "suggestions": [      }
+
+        "Break down tasks into smaller steps",    },
+
+        "Practice time management techniques",    "helperId": {
+
+        "Talk to a counselor about academic stress"      "_id": "60f7b1234567890abcdef125",
+
+      ],      "username": "helper_sarah",
+
+      "mood": "supportive",      "profile": {
+
+      "confidence": 0.89        "firstName": "Sarah"
+
+    },      },
+
+    "sessionId": "ai_session_123456",      "role": "peer"
+
+    "conversationId": "615f1234567890abcdef1239"    },
+
+  }    "helperType": "peer",
+
+}    "status": "active",
+
+```    "severity": "moderate",
+
     "title": "Job Interview Anxiety Support",
-    "description": "I'm feeling anxious about an upcoming job interview",
-    "startedAt": "2025-09-22T10:35:00.000Z",
+
+### 2. Continue AI Conversation    "description": "I'm feeling anxious about an upcoming job interview",
+
+**Endpoint**: `POST /api/ai/continue`    "startedAt": "2025-09-22T10:35:00.000Z",
+
     "createdAt": "2025-09-22T10:30:00.000Z"
-  },
+
+**Headers**: `Authorization: Bearer <token>`  },
+
   "welcomeMessage": {
-    "_id": "60f7b1234567890abcdef130",
-    "message": "Hi! I'm here to help and support you...",
-    "createdAt": "2025-09-22T10:35:05.000Z"
-  },
-  "instructions": {
-    "nextSteps": [
-      "Send a welcome message to introduce yourself",
-      "Ask about their current situation and feelings",
+
+**Request Body**:    "_id": "60f7b1234567890abcdef130",
+
+```json    "message": "Hi! I'm here to help and support you...",
+
+{    "createdAt": "2025-09-22T10:35:05.000Z"
+
+  "conversationId": "615f1234567890abcdef1239",  },
+
+  "message": "I have three exams next week and two assignments due",  "instructions": {
+
+  "sessionId": "ai_session_123456"    "nextSteps": [
+
+}      "Send a welcome message to introduce yourself",
+
+```      "Ask about their current situation and feelings",
+
       "Provide support and active listening",
-      "Use /api/messages to send messages",
-      "Monitor for any crisis indicators"
+
+### 3. Get AI Conversation History      "Use /api/messages to send messages",
+
+**Endpoint**: `GET /api/ai/conversations/:conversationId`      "Monitor for any crisis indicators"
+
     ],
-    "endpoints": {
+
+**Headers**: `Authorization: Bearer <token>`    "endpoints": {
+
       "sendMessage": "POST /api/messages",
-      "getMessages": "GET /api/messages/session/60f7b1234567890abcdef124",
-      "escalate": "POST /api/urgent/escalate"
-    }
+
+**Success Response (200)**:      "getMessages": "GET /api/messages/session/60f7b1234567890abcdef124",
+
+```json      "escalate": "POST /api/urgent/escalate"
+
+{    }
+
+  "success": true,  }
+
+  "data": {}
+
+    "conversation": {```
+
+      "id": "615f1234567890abcdef1239",
+
+      "userId": "615f1234567890abcdef1234",**Error Responses**:
+
+      "messages": [```json
+
+        {// 403 - Not qualified helper
+
+          "role": "user",{
+
+          "content": "I'm feeling overwhelmed with my studies",  "error": "Only peers, counselors, and admins can accept sessions"
+
+          "timestamp": "2025-09-23T08:14:15.000Z"}
+
+        },
+
+        {// 400 - Session not waiting
+
+          "role": "assistant",{
+
+          "content": "I understand you're feeling overwhelmed...",  "error": "Can only accept sessions that are waiting for a helper"
+
+          "timestamp": "2025-09-23T08:14:18.000Z",}
+
+          "suggestions": ["Break down tasks into smaller steps"]
+
+        }// 409 - Already has helper
+
+      ],{
+
+      "status": "active",  "error": "Session already has a helper assigned"
+
+      "startedAt": "2025-09-23T08:14:15.000Z"}
+
+    }```
+
   }
-}
+
+}---
+
 ```
-
-**Error Responses**:
-```json
-// 403 - Not qualified helper
-{
-  "error": "Only peers, counselors, and admins can accept sessions"
-}
-
-// 400 - Session not waiting
-{
-  "error": "Can only accept sessions that are waiting for a helper"
-}
-
-// 409 - Already has helper
-{
-  "error": "Session already has a helper assigned"
-}
-```
-
----
 
 ### POST /api/sessions/:sessionId/decline
 
-Decline a waiting session if unable to accept it.
+### 4. End AI Conversation
 
-**Authentication**: Required  
+**Endpoint**: `POST /api/ai/conversations/:conversationId/end`Decline a waiting session if unable to accept it.
+
+
+
+**Headers**: `Authorization: Bearer <token>`**Authentication**: Required  
+
 **Authorization**: User must have peer, counselor, or admin role
 
 **Request Body**:
-```json
-{
-  "reason": "Currently at capacity with other sessions"
-}
+
+```json**Request Body**:
+
+{```json
+
+  "rating": 4,{
+
+  "feedback": "Helpful suggestions for managing stress",  "reason": "Currently at capacity with other sessions"
+
+  "helpful_topics": ["time_management", "stress_reduction"]}
+
+}```
+
 ```
 
 **Field Descriptions**:
-- `reason`: Optional reason for declining the session
 
-**Success Response (200)**:
+---- `reason`: Optional reason for declining the session
+
+
+
+## Urgent Operations**Success Response (200)**:
+
 ```json
-{
-  "message": "Session declined successfully",
+
+### 1. Escalate Session to Urgent{
+
+**Endpoint**: `POST /api/urgent/escalate`  "message": "Session declined successfully",
+
   "note": "Session remains available for other helpers to accept",
-  "sessionStatus": "waiting",
+
+**Headers**: `Authorization: Bearer <token>`  "sessionStatus": "waiting",
+
   "declinesCount": 2
+
+**Request Body**:}
+
+```json```
+
+{
+
+  "sessionId": "615f1234567890abcdef1235",---
+
+  "reason": "User expressing self-harm thoughts",
+
+  "severity": "high",### POST /api/sessions/:sessionId/join
+
+  "helperType": "counselor",
+
+  "immediateAction": trueJoin a session as a helper.
+
 }
-```
 
----
+```**Authentication**: Required  
 
-### POST /api/sessions/:sessionId/join
-
-Join a session as a helper.
-
-**Authentication**: Required  
 **Authorization**: User must have peer/counselor role
 
-**Request Body**:
-```json
-{
-  "message": "Hi! I'm here to help and support you through whatever you're experiencing."
-}
+**Success Response (200)**:
+
+```json**Request Body**:
+
+{```json
+
+  "success": true,{
+
+  "message": "Session escalated successfully",  "message": "Hi! I'm here to help and support you through whatever you're experiencing."
+
+  "data": {}
+
+    "urgentSession": {```
+
+      "id": "615f1234567890abcdef1240",
+
+      "originalSessionId": "615f1234567890abcdef1235",**Success Response (200)**:
+
+      "severity": "high",```json
+
+      "status": "escalated",{
+
+      "escalatedAt": "2025-09-23T08:14:15.000Z",  "message": "Joined session successfully",
+
+      "estimatedResponseTime": 120,  "session": {
+
+      "priority": 1,    "_id": "60f7b1234567890abcdef124",
+
+      "assignedCounselor": "615f1234567890abcdef1238"    "status": "active",
+
+    }    "helperId": "60f7b1234567890abcdef125",
+
+  }    "startedAt": "2025-09-22T10:35:00.000Z"
+
+}  }
+
+```}
+
 ```
 
-**Success Response (200)**:
+### 2. Get Urgent Sessions Queue
+
+**Endpoint**: `GET /api/urgent/queue`---
+
+
+
+**Headers**: `Authorization: Bearer <token>` (Counselor/Admin only)## Message Endpoints
+
+
+
+**Success Response (200)**:### GET /api/messages/session/:sessionId
+
 ```json
-{
-  "message": "Joined session successfully",
-  "session": {
-    "_id": "60f7b1234567890abcdef124",
-    "status": "active",
-    "helperId": "60f7b1234567890abcdef125",
-    "startedAt": "2025-09-22T10:35:00.000Z"
-  }
-}
-```
 
----
+{Get messages for a specific session with pagination.
 
-## Message Endpoints
+  "success": true,
 
-### GET /api/messages/session/:sessionId
+  "data": {**Authentication**: Required  
 
-Get messages for a specific session with pagination.
+    "urgentSessions": [**Authorization**: User must be participant in session
 
-**Authentication**: Required  
-**Authorization**: User must be participant in session
+      {
 
-**Query Parameters**:
-- `limit`: Number of messages (default: 50, max: 200)
-- `before`: Get messages before this timestamp (ISO string)
-- `after`: Get messages after this timestamp (ISO string)
-- `messageId`: Get messages before/after this message ID
-- `search`: Search within message content
+        "id": "615f1234567890abcdef1240",**Query Parameters**:
 
-**Success Response (200)**:
-```json
-{
-  "messages": [
-    {
-      "_id": "60f7b1234567890abcdef126",
-      "sessionId": "60f7b1234567890abcdef124",
-      "senderId": {
-        "_id": "60f7b1234567890abcdef123",
-        "username": "johndoe123",
+        "user": {- `limit`: Number of messages (default: 50, max: 200)
+
+          "id": "615f1234567890abcdef1234",- `before`: Get messages before this timestamp (ISO string)
+
+          "username": "john_doe"- `after`: Get messages after this timestamp (ISO string)
+
+        },- `messageId`: Get messages before/after this message ID
+
+        "severity": "high",- `search`: Search within message content
+
+        "waitTime": 45,
+
+        "escalatedAt": "2025-09-23T08:14:15.000Z",**Success Response (200)**:
+
+        "reason": "User expressing self-harm thoughts",```json
+
+        "priority": 1{
+
+      }  "messages": [
+
+    ],    {
+
+    "queueLength": 1,      "_id": "60f7b1234567890abcdef126",
+
+    "averageWaitTime": 180      "sessionId": "60f7b1234567890abcdef124",
+
+  }      "senderId": {
+
+}        "_id": "60f7b1234567890abcdef123",
+
+```        "username": "johndoe123",
+
         "profile": {
-          "preferredName": "Johnny"
-        }
+
+### 3. Accept Urgent Session          "preferredName": "Johnny"
+
+**Endpoint**: `POST /api/urgent/:sessionId/accept`        }
+
       },
-      "message": "I've been feeling really anxious about my job interview tomorrow",
+
+**Headers**: `Authorization: Bearer <token>` (Counselor only)      "message": "I've been feeling really anxious about my job interview tomorrow",
+
       "senderRole": "patient",
-      "messageType": "text",
-      "createdAt": "2025-09-22T10:40:00.000Z",
+
+### 4. Get Emergency Contacts      "messageType": "text",
+
+**Endpoint**: `GET /api/urgent/emergency-contacts`      "createdAt": "2025-09-22T10:40:00.000Z",
+
       "updatedAt": "2025-09-22T10:40:00.000Z",
-      "replyTo": null,
+
+**Headers**: `Authorization: Bearer <token>`      "replyTo": null,
+
       "reactions": [
-        {
-          "userId": "60f7b1234567890abcdef125",
-          "reaction": "supportive",
-          "createdAt": "2025-09-22T10:41:00.000Z"
-        }
-      ],
-      "crisisDetected": false,
-      "aiGenerated": false,
-      "isEdited": false,
-      "attachments": []
-    },
-    {
-      "_id": "60f7b1234567890abcdef127",
-      "sessionId": "60f7b1234567890abcdef124",
-      "senderId": {
-        "_id": "60f7b1234567890abcdef125",
-        "username": "helper_sarah",
-        "profile": {
-          "firstName": "Sarah"
-        }
-      },
-      "message": "Thank you for sharing that with me. Interview anxiety is completely normal and you're not alone in feeling this way.",
-      "senderRole": "peer",
-      "messageType": "text",
-      "createdAt": "2025-09-22T10:42:00.000Z",
+
+**Success Response (200)**:        {
+
+```json          "userId": "60f7b1234567890abcdef125",
+
+{          "reaction": "supportive",
+
+  "success": true,          "createdAt": "2025-09-22T10:41:00.000Z"
+
+  "data": {        }
+
+    "contacts": {      ],
+
+      "crisis_hotline": {      "crisisDetected": false,
+
+        "name": "National Crisis Hotline",      "aiGenerated": false,
+
+        "phone": "988",      "isEdited": false,
+
+        "available": "24/7"      "attachments": []
+
+      },    },
+
+      "local_emergency": {    {
+
+        "name": "Campus Safety",      "_id": "60f7b1234567890abcdef127",
+
+        "phone": "+1-555-0123",      "sessionId": "60f7b1234567890abcdef124",
+
+        "available": "24/7"      "senderId": {
+
+      },        "_id": "60f7b1234567890abcdef125",
+
+      "counseling_center": {        "username": "helper_sarah",
+
+        "name": "University Counseling Center",        "profile": {
+
+        "phone": "+1-555-0456",          "firstName": "Sarah"
+
+        "available": "Mon-Fri 8AM-5PM"        }
+
+      }      },
+
+    }      "message": "Thank you for sharing that with me. Interview anxiety is completely normal and you're not alone in feeling this way.",
+
+  }      "senderRole": "peer",
+
+}      "messageType": "text",
+
+```      "createdAt": "2025-09-22T10:42:00.000Z",
+
       "replyTo": "60f7b1234567890abcdef126",
-      "crisisDetected": false,
+
+---      "crisisDetected": false,
+
       "aiGenerated": false,
-      "suggestedResources": [
+
+## Psychological Screening      "suggestedResources": [
+
         {
-          "title": "Deep Breathing Exercises",
-          "type": "coping-strategy",
+
+### Quick Reference          "title": "Deep Breathing Exercises",
+
+For complete psychological screening documentation, see [Psychological Screening API](./psychological-screening-api-docs.md).          "type": "coping-strategy",
+
           "url": "https://example.com/breathing"
-        }
-      ]
-    }
-  ],
-  "pagination": {
-    "hasMore": true,
-    "total": 12,
+
+### Core Endpoints        }
+
+- `GET /api/questionnaires/type/:type` - Get questionnaire (PHQ-9, GAD-7, GHQ)      ]
+
+- `POST /api/responses/start` - Start assessment session    }
+
+- `POST /api/responses/submit-answer` - Submit answers  ],
+
+- `POST /api/responses/complete` - Complete and score assessment  "pagination": {
+
+- `GET /api/results/user/:userId/latest` - Get latest results    "hasMore": true,
+
+- `GET /api/results/admin/aggregate` - Admin analytics    "total": 12,
+
     "oldestMessageId": "60f7b1234567890abcdef126",
-    "newestMessageId": "60f7b1234567890abcdef127"
-  },
-  "sessionInfo": {
-    "status": "active",
+
+### Supported Assessments    "newestMessageId": "60f7b1234567890abcdef127"
+
+- **PHQ-9**: Depression screening  },
+
+- **GAD-7**: Anxiety assessment    "sessionInfo": {
+
+- **GHQ-12/GHQ-28**: General health questionnaire    "status": "active",
+
     "participants": 2,
-    "crisisFlags": 0
-  }
+
+### Example Flow    "crisisFlags": 0
+
+```bash  }
+
+# 1. Get questionnaire}
+
+GET /api/questionnaires/type/PHQ-9```
+
+
+
+# 2. Start session---
+
+POST /api/responses/start
+
+{### POST /api/messages
+
+  "questionnaireId": "quest_id",
+
+  "questionnaireType": "PHQ-9"Send a message to a session (alternative to Socket.io).
+
 }
-```
-
----
-
-### POST /api/messages
-
-Send a message to a session (alternative to Socket.io).
 
 **Authentication**: Required
 
-**Request Body**:
-```json
-{
-  "sessionId": "60f7b1234567890abcdef124",
-  "message": "That really helps, thank you. Can you tell me more about breathing exercises?",
-  "messageType": "text",
+# 3. Submit answers (repeat for each question)
+
+POST /api/responses/submit-answer**Request Body**:
+
+{```json
+
+  "sessionId": "session_uuid",{
+
+  "questionNumber": 1,  "sessionId": "60f7b1234567890abcdef124",
+
+  "selectedValue": 2  "message": "That really helps, thank you. Can you tell me more about breathing exercises?",
+
+}  "messageType": "text",
+
   "replyTo": "60f7b1234567890abcdef127",
-  "attachments": []
-}
-```
 
-**For file/image messages**:
+# 4. Complete assessment  "attachments": []
+
+POST /api/responses/complete}
+
+{```
+
+  "sessionId": "session_uuid"
+
+}**For file/image messages**:
+
 ```json
-{
-  "sessionId": "60f7b1234567890abcdef124",
-  "message": "Here's a photo that helps me feel calm",
+
+# 5. Get results{
+
+GET /api/results/user/{userId}/latest?questionnaireType=PHQ-9  "sessionId": "60f7b1234567890abcdef124",
+
+```  "message": "Here's a photo that helps me feel calm",
+
   "messageType": "image",
-  "attachments": [
+
+---  "attachments": [
+
     {
-      "url": "https://cloudinary.com/...",
+
+## Real-time Communication      "url": "https://cloudinary.com/...",
+
       "type": "image",
-      "filename": "calming-photo.jpg",
+
+### Socket.io Events      "filename": "calming-photo.jpg",
+
       "size": 245760
-    }
-  ]
-}
-```
 
-**Success Response (201)**:
-```json
-{
-  "message": "Message sent successfully",
+#### Connection    }
+
+```javascript  ]
+
+// Client connection}
+
+const socket = io('http://localhost:5000', {```
+
+  auth: {
+
+    token: 'your_jwt_token'**Success Response (201)**:
+
+  }```json
+
+});{
+
+```  "message": "Message sent successfully",
+
   "messageData": {
-    "_id": "60f7b1234567890abcdef128",
-    "sessionId": "60f7b1234567890abcdef124",
-    "senderId": "60f7b1234567890abcdef123",
-    "message": "That really helps, thank you. Can you tell me more about breathing exercises?",
-    "senderRole": "patient",
-    "messageType": "text",
-    "createdAt": "2025-09-22T10:45:00.000Z",
-    "replyTo": {
-      "_id": "60f7b1234567890abcdef127",
-      "message": "Thank you for sharing that with me..."
-    },
-    "crisisDetected": false,
-    "aiAnalysis": {
-      "intent": "seeking-information",
-      "sentiment": "positive",
-      "urgency": "low"
-    }
-  },
-  "aiSuggestions": [
-    {
-      "type": "resource",
-      "title": "4-7-8 Breathing Technique",
-      "description": "A simple breathing exercise to reduce anxiety"
-    }
-  ]
-}
-```
 
----
+#### Session Events    "_id": "60f7b1234567890abcdef128",
+
+```javascript    "sessionId": "60f7b1234567890abcdef124",
+
+// Join session room    "senderId": "60f7b1234567890abcdef123",
+
+socket.emit('join-session', {    "message": "That really helps, thank you. Can you tell me more about breathing exercises?",
+
+  sessionId: '615f1234567890abcdef1235'    "senderRole": "patient",
+
+});    "messageType": "text",
+
+    "createdAt": "2025-09-22T10:45:00.000Z",
+
+// New message received    "replyTo": {
+
+socket.on('new-message', (data) => {      "_id": "60f7b1234567890abcdef127",
+
+  console.log('New message:', data.message);      "message": "Thank you for sharing that with me..."
+
+});    },
+
+    "crisisDetected": false,
+
+// Session status update    "aiAnalysis": {
+
+socket.on('session-update', (data) => {      "intent": "seeking-information",
+
+  console.log('Session status:', data.status);      "sentiment": "positive",
+
+});      "urgency": "low"
+
+    }
+
+// Crisis alert  },
+
+socket.on('crisis-alert', (data) => {  "aiSuggestions": [
+
+  console.log('Crisis detected:', data.alert);    {
+
+});      "type": "resource",
+
+```      "title": "4-7-8 Breathing Technique",
+
+      "description": "A simple breathing exercise to reduce anxiety"
+
+#### Typing Indicators    }
+
+```javascript  ]
+
+// Send typing indicator}
+
+socket.emit('typing', {```
+
+  sessionId: '615f1234567890abcdef1235',
+
+  isTyping: true---
+
+});
 
 ### PUT /api/messages/:messageId
 
-Edit a previously sent message.
+// Receive typing indicator
 
-**Authentication**: Required  
-**Authorization**: User must be the sender
+socket.on('user-typing', (data) => {Edit a previously sent message.
 
-**Request Body**:
-```json
-{
-  "message": "That really helps, thank you so much. Can you tell me more about breathing exercises?"
-}
+  console.log(`${data.username} is typing...`);
+
+});**Authentication**: Required  
+
+```**Authorization**: User must be the sender
+
+
+
+#### Presence Updates**Request Body**:
+
+```javascript```json
+
+// User online/offline status{
+
+socket.on('user-status-change', (data) => {  "message": "That really helps, thank you so much. Can you tell me more about breathing exercises?"
+
+  console.log(`${data.username} is now ${data.status}`);}
+
+});```
+
 ```
 
 **Success Response (200)**:
-```json
+
+---```json
+
 {
-  "message": "Message updated successfully",
+
+## Data Schemas  "message": "Message updated successfully",
+
   "messageData": {
-    "_id": "60f7b1234567890abcdef128",
-    "message": "That really helps, thank you so much. Can you tell me more about breathing exercises?",
-    "isEdited": true,
-    "editedAt": "2025-09-22T10:47:00.000Z"
-  }
-}
+
+### User Schema    "_id": "60f7b1234567890abcdef128",
+
+```json    "message": "That really helps, thank you so much. Can you tell me more about breathing exercises?",
+
+{    "isEdited": true,
+
+  "id": "string",    "editedAt": "2025-09-22T10:47:00.000Z"
+
+  "username": "string",  }
+
+  "email": "string",}
+
+  "role": "patient|peer|counselor|admin",```
+
+  "profile": {
+
+    "firstName": "string",---
+
+    "lastName": "string",
+
+    "dateOfBirth": "date",### DELETE /api/messages/:messageId
+
+    "phoneNumber": "string",
+
+    "bio": "string",Delete a message (soft delete for audit purposes).
+
+    "emergencyContact": {
+
+      "name": "string",**Authentication**: Required  
+
+      "relationship": "string",**Authorization**: User must be sender or have admin role
+
+      "phoneNumber": "string"
+
+    }**Success Response (200)**:
+
+  },```json
+
+  "isActive": "boolean",{
+
+  "isOnline": "boolean",  "message": "Message deleted successfully"
+
+  "lastLogin": "date",}
+
+  "createdAt": "date",```
+
+  "updatedAt": "date"
+
+}---
+
 ```
-
----
-
-### DELETE /api/messages/:messageId
-
-Delete a message (soft delete for audit purposes).
-
-**Authentication**: Required  
-**Authorization**: User must be sender or have admin role
-
-**Success Response (200)**:
-```json
-{
-  "message": "Message deleted successfully"
-}
-```
-
----
 
 ## Crisis Management
 
-### POST /api/crisis/create
+### Session Schema
 
-Create a crisis alert when crisis indicators are detected.
+```json### POST /api/crisis/create
 
-**Authentication**: Required
-
-**Request Body**:
-```json
 {
-  "severity": "high",
-  "type": "self-harm-indication",
-  "description": "User expressed thoughts of self-harm in session",
-  "location": {
-    "latitude": 40.7128,
-    "longitude": -74.0060,
-    "address": "New York, NY",
-    "accuracy": 100
-  },
-  "sessionId": "60f7b1234567890abcdef124",
+
+  "id": "string",Create a crisis alert when crisis indicators are detected.
+
+  "type": "peer_support|counselor_session|crisis_intervention",
+
+  "title": "string",**Authentication**: Required
+
+  "description": "string",
+
+  "status": "pending|active|completed|cancelled",**Request Body**:
+
+  "urgencyLevel": "low|medium|high|critical",```json
+
+  "patientId": "string",{
+
+  "helperId": "string",  "severity": "high",
+
+  "tags": ["string"],  "type": "self-harm-indication",
+
+  "duration": "number",  "description": "User expressed thoughts of self-harm in session",
+
+  "rating": "number",  "location": {
+
+  "feedback": "string",    "latitude": 40.7128,
+
+  "createdAt": "date",    "longitude": -74.0060,
+
+  "startedAt": "date",    "address": "New York, NY",
+
+  "completedAt": "date"    "accuracy": 100
+
+}  },
+
+```  "sessionId": "60f7b1234567890abcdef124",
+
   "triggerMessage": "I just don't see the point in continuing anymore",
-  "detectionMethod": "keyword-analysis",
-  "riskFactors": [
-    "expressed-hopelessness",
-    "social-isolation",
-    "previous-attempts"
-  ]
-}
-```
 
-**Field Descriptions**:
-- `severity`: `medium` | `high` | `critical`
-- `type`: `self-harm-indication` | `suicide-risk` | `immediate-danger` | `user-report`
+### Message Schema  "detectionMethod": "keyword-analysis",
 
-**Success Response (201)**:
-```json
-{
-  "message": "Crisis alert created successfully",
+```json  "riskFactors": [
+
+{    "expressed-hopelessness",
+
+  "id": "string",    "social-isolation",
+
+  "sessionId": "string",    "previous-attempts"
+
+  "senderId": "string",  ]
+
+  "content": {}
+
+    "text": "string",```
+
+    "type": "text|image|file|emoji"
+
+  },**Field Descriptions**:
+
+  "timestamp": "date",- `severity`: `medium` | `high` | `critical`
+
+  "isEncrypted": "boolean",- `type`: `self-harm-indication` | `suicide-risk` | `immediate-danger` | `user-report`
+
+  "isEdited": "boolean",
+
+  "messageNumber": "number",**Success Response (201)**:
+
+  "replyTo": "string"```json
+
+}{
+
+```  "message": "Crisis alert created successfully",
+
   "alert": {
-    "_id": "60f7b1234567890abcdef129",
-    "userId": "60f7b1234567890abcdef123",
-    "sessionId": "60f7b1234567890abcdef124",
-    "severity": "high",
-    "type": "self-harm-indication",
-    "status": "active",
-    "description": "User expressed thoughts of self-harm in session",
-    "createdAt": "2025-09-22T10:50:00.000Z",
-    "assignedCounselorId": "60f7b1234567890abcdef130",
-    "estimatedResponseTime": 300,
-    "alertNumber": "CA-2025-001234"
-  },
-  "immediateActions": [
-    {
-      "action": "counselor-notified",
-      "status": "completed",
-      "timestamp": "2025-09-22T10:50:00.000Z"
-    },
-    {
-      "action": "session-escalated",
+
+### Crisis Alert Schema    "_id": "60f7b1234567890abcdef129",
+
+```json    "userId": "60f7b1234567890abcdef123",
+
+{    "sessionId": "60f7b1234567890abcdef124",
+
+  "id": "string",    "severity": "high",
+
+  "userId": "string",    "type": "self-harm-indication",
+
+  "severity": "low|medium|high|critical",    "status": "active",
+
+  "status": "active|investigating|resolved",    "description": "User expressed thoughts of self-harm in session",
+
+  "description": "string",    "createdAt": "2025-09-22T10:50:00.000Z",
+
+  "triggerContent": {    "assignedCounselorId": "60f7b1234567890abcdef130",
+
+    "text": "string",    "estimatedResponseTime": 300,
+
+    "messageId": "string",    "alertNumber": "CA-2025-001234"
+
+    "sessionId": "string"  },
+
+  },  "immediateActions": [
+
+  "detectionMethod": "keyword_analysis|ai_detection|manual_report",    {
+
+  "assignedCounselor": "string",      "action": "counselor-notified",
+
+  "resolution": "string",      "status": "completed",
+
+  "createdAt": "date",      "timestamp": "2025-09-22T10:50:00.000Z"
+
+  "resolvedAt": "date"    },
+
+}    {
+
+```      "action": "session-escalated",
+
       "status": "in-progress",
-      "timestamp": "2025-09-22T10:50:05.000Z"
+
+---      "timestamp": "2025-09-22T10:50:05.000Z"
+
     }
-  ],
+
+## Examples  ],
+
   "emergencyContacts": {
-    "crisis": "988",
-    "text": "Text HOME to 741741",
-    "emergency": "911",
-    "local": {
-      "name": "NYC Crisis Hotline",
-      "phone": "1-888-NYC-WELL"
+
+### Complete Session Flow    "crisis": "988",
+
+```bash    "text": "Text HOME to 741741",
+
+# 1. Login    "emergency": "911",
+
+curl -X POST http://localhost:5000/api/auth/login \    "local": {
+
+  -H "Content-Type: application/json" \      "name": "NYC Crisis Hotline",
+
+  -d '{"email":"user@example.com","password":"password123"}'      "phone": "1-888-NYC-WELL"
+
     }
-  },
-  "resources": [
-    {
-      "title": "Crisis Text Line",
-      "description": "Free, 24/7 crisis support via text",
+
+# 2. Create session  },
+
+curl -X POST http://localhost:5000/api/sessions \  "resources": [
+
+  -H "Authorization: Bearer <token>" \    {
+
+  -H "Content-Type: application/json" \      "title": "Crisis Text Line",
+
+  -d '{"type":"peer_support","title":"Need help with anxiety"}'      "description": "Free, 24/7 crisis support via text",
+
       "contact": "Text HOME to 741741",
-      "type": "immediate"
-    },
-    {
-      "title": "National Suicide Prevention Lifeline",
-      "description": "Free, confidential support 24/7",
+
+# 3. Send message      "type": "immediate"
+
+curl -X POST http://localhost:5000/api/messages \    },
+
+  -H "Authorization: Bearer <token>" \    {
+
+  -H "Content-Type: application/json" \      "title": "National Suicide Prevention Lifeline",
+
+  -d '{"sessionId":"session_id","content":{"text":"Hello, I need help"}}'      "description": "Free, confidential support 24/7",
+
       "contact": "988",
-      "type": "immediate"
-    }
-  ]
-}
+
+# 4. End session      "type": "immediate"
+
+curl -X POST http://localhost:5000/api/sessions/session_id/end \    }
+
+  -H "Authorization: Bearer <token>" \  ]
+
+  -H "Content-Type: application/json" \}
+
+  -d '{"rating":5,"feedback":"Very helpful"}'```
+
 ```
 
 ---
 
-### GET /api/crisis/
+### Crisis Management Flow
 
-Get crisis alerts (restricted to counselors and admins).
+```bash### GET /api/crisis/
 
-**Authentication**: Required  
-**Authorization**: Counselor or Admin role
+# 1. Detect crisis (automated or manual)
 
-**Query Parameters**:
-- `status`: Filter by status (`active`, `resolved`, `escalated`)
-- `severity`: Filter by severity (`medium`, `high`, `critical`)
-- `assignedTo`: Filter by assigned counselor ID
-- `limit`: Number of alerts (default: 20)
+curl -X POST http://localhost:5000/api/crisis \Get crisis alerts (restricted to counselors and admins).
+
+  -H "Authorization: Bearer <token>" \
+
+  -H "Content-Type: application/json" \**Authentication**: Required  
+
+  -d '{"severity":"high","description":"Suicidal ideation detected"}'**Authorization**: Counselor or Admin role
+
+
+
+# 2. Escalate session**Query Parameters**:
+
+curl -X POST http://localhost:5000/api/urgent/escalate \- `status`: Filter by status (`active`, `resolved`, `escalated`)
+
+  -H "Authorization: Bearer <token>" \- `severity`: Filter by severity (`medium`, `high`, `critical`)
+
+  -H "Content-Type: application/json" \- `assignedTo`: Filter by assigned counselor ID
+
+  -d '{"sessionId":"session_id","severity":"high","helperType":"counselor"}'- `limit`: Number of alerts (default: 20)
+
 - `page`: Page number (default: 1)
-- `dateFrom`: Start date filter
-- `dateTo`: End date filter
 
-**Success Response (200)**:
+# 3. Get emergency contacts- `dateFrom`: Start date filter
+
+curl -X GET http://localhost:5000/api/urgent/emergency-contacts \- `dateTo`: End date filter
+
+  -H "Authorization: Bearer <token>"
+
+```**Success Response (200)**:
+
 ```json
-{
+
+---{
+
   "alerts": [
-    {
+
+## Support    {
+
       "_id": "60f7b1234567890abcdef129",
-      "user": {
-        "_id": "60f7b1234567890abcdef123",
-        "username": "johndoe123",
-        "profile": {
-          "firstName": "John",
+
+For technical support or questions about the API:      "user": {
+
+- **Documentation**: Complete API documentation available        "_id": "60f7b1234567890abcdef123",
+
+- **Error Codes**: Standardized error responses with specific codes        "username": "johndoe123",
+
+- **Rate Limits**: Clearly defined with headers        "profile": {
+
+- **Real-time Support**: Socket.io for live communication          "firstName": "John",
+
           "age": 25
-        }
-      },
+
+**Version**: 1.0.0          }
+
+**Last Updated**: September 23, 2025      },
       "session": {
         "_id": "60f7b1234567890abcdef124",
         "status": "escalated"
@@ -1649,6 +2854,97 @@ Request immediate crisis intervention.
   }
 }
 ```
+
+---
+
+## Psychological Screening
+
+The psychological screening system provides comprehensive tools for administering and analyzing standardized mental health assessments including PHQ-9 (depression), GAD-7 (anxiety), and GHQ (general health) questionnaires.
+
+### Quick Overview
+
+**Core Endpoints:**
+- `POST /api/questionnaires` - Create questionnaire templates (Admin)
+- `GET /api/questionnaires/type/:type` - Get questionnaire by type
+- `POST /api/responses/start` - Start response session
+- `POST /api/responses/submit-answer` - Submit individual answers
+- `POST /api/responses/complete` - Complete and score questionnaire
+- `GET /api/results/user/:userId/latest` - Get latest results
+- `GET /api/results/admin/aggregate` - Admin analytics
+
+### Supported Questionnaires
+- **PHQ-9**: Patient Health Questionnaire (Depression screening)
+- **GAD-7**: Generalized Anxiety Disorder scale
+- **GHQ-12/GHQ-28**: General Health Questionnaire
+
+### Key Features
+- ✅ Automatic scoring with severity level determination
+- ✅ Risk flag detection (suicidal ideation, severe symptoms)
+- ✅ Real-time session management with UUID tracking
+- ✅ Comprehensive analytics and trend analysis
+- ✅ Admin review system for flagged responses
+- ✅ Category-based scoring for detailed insights
+
+### Example Usage Flow
+
+1. **Get Available Questionnaire**:
+   ```http
+   GET /api/questionnaires/type/PHQ-9
+   ```
+
+2. **Start Response Session**:
+   ```http
+   POST /api/responses/start
+   {
+     "questionnaireId": "615f1234567890abcdef1234",
+     "questionnaireType": "PHQ-9"
+   }
+   ```
+
+3. **Submit Answers** (repeat for each question):
+   ```http
+   POST /api/responses/submit-answer
+   {
+     "sessionId": "uuid-session-id",
+     "questionNumber": 1,
+     "questionId": "question-object-id",
+     "selectedValue": 2,
+     "selectedText": "More than half the days"
+   }
+   ```
+
+4. **Complete Assessment**:
+   ```http
+   POST /api/responses/complete
+   {
+     "sessionId": "uuid-session-id"
+   }
+   ```
+
+5. **View Results**:
+   ```http
+   GET /api/results/user/{userId}/latest?questionnaireType=PHQ-9
+   ```
+
+### Scoring & Interpretation
+
+The system automatically calculates:
+- **Total Score**: Sum of all responses
+- **Percentage Score**: Score as percentage of maximum possible
+- **Severity Level**: Categorized interpretation (minimal, mild, moderate, moderately severe, severe)
+- **Category Scores**: Breakdown by symptom categories (mood, anxiety, cognitive, etc.)
+- **Risk Flags**: Automatic detection of concerning responses
+
+### Admin Analytics
+
+Administrators can access aggregate data including:
+- Response distribution by severity level
+- Trend analysis over time
+- Risk-flagged responses requiring review
+- Completion rates and average scores
+- Institution-wide mental health insights
+
+**📖 For complete API documentation with request/response examples, see [Psychological Screening API Documentation](./psychological-screening-api-docs.md)**
 
 ---
 

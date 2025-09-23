@@ -5,6 +5,9 @@ const crisis = require('./crisis');
 const ai = require('./ai');
 const chatbot = require('./chatbot');
 const urgent = require('./urgent');
+const questionnaires = require('./questionnaires');
+const responses = require('./responses');
+const results = require('./results');
 
 module.exports = {
   auth,
@@ -13,5 +16,8 @@ module.exports = {
   crisis,
   ai,
   chatbot,
-  urgent
+  urgent,
+  questionnaires,
+  responses,
+  results
 };
