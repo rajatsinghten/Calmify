@@ -555,6 +555,23 @@ class ApiService {
       throw new Error('Unable to connect to the backend server. Please ensure it is running on http://localhost:5000');
     }
   }
+
+  // AI Chatbot APIs
+  async sendChatMessage(message: string, conversationId?: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/ai/chat`, {
+      method: 'POST',
+      headers: {
+        ...this.getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message,
+        conversationId
+      }),
+    });
+
+    return this.handleResponse<any>(response);
+  }
 }
 
 export const apiService = new ApiService();
