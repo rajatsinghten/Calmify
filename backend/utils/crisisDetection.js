@@ -1,4 +1,4 @@
-const { CrisisAlert, Message, User } = require('../models');
+const { CrisisAlert, Message, User, Session } = require('../models');
 
 // Crisis keywords with confidence weights
 const CRISIS_KEYWORDS = {
@@ -133,14 +133,18 @@ const createCrisisAlert = async (messageId, userId, sessionId, analysis) => {
 const sendEmergencyNotifications = async (alert) => {
   try {
     // Log for emergency responders (in production, this would trigger real notifications)
-    console.log('🚨 CRISIS ALERT:', {
+    console.log('🚨 CRISIS ALERT TRIGGERED:', {
       alertId: alert._id,
-      userId: alert.user._id,
+      userId: alert.user._id || alert.user,
       severity: alert.severity,
       confidence: alert.triggerContent.confidence,
       keywords: alert.triggerContent.keywords,
       timestamp: new Date()
     });
+
+    // Automatically create critical counselor session request
+    // Note: Counselor session creation is now handled in the AI route
+    console.log('📋 Crisis alert logged - session creation handled by calling service');
 
     // In production, implement:
     // 1. Email notifications to crisis team
@@ -154,7 +158,7 @@ const sendEmergencyNotifications = async (alert) => {
         session: alert.session,
         sender: alert.user._id, // Will be overridden as system message
         content: {
-          text: `Crisis alert triggered. A counselor has been notified and will reach out soon. If this is an immediate emergency, please contact emergency services at 911 or the crisis hotline at 988.`,
+          text: `Crisis alert triggered. A counselor has been automatically notified and will reach out soon. If this is an immediate emergency, please contact emergency services at 911 or the crisis hotline at 988.`,
           type: 'system'
         },
         metadata: {
@@ -170,6 +174,78 @@ const sendEmergencyNotifications = async (alert) => {
     
   } catch (error) {
     console.error('Error sending emergency notifications:', error);
+  }
+};
+
+// Create critical counselor session request using proper API
+const createCriticalCounselorRequest = async (alert) => {
+  try {
+    console.log('🔍 Creating critical counselor request for alert:', alert._id);
+    console.log('Alert user info:', { id: alert.user?._id, username: alert.user?.username });
+    
+    const userId = alert.user?._id || alert.user;
+    if (!userId) {
+      console.error('❌ No user ID found in alert:', alert);
+      throw new Error('User ID not found in crisis alert');
+    }
+    
+    // Check if user already has an active session with a counselor
+    const existingSession = await Session.findOne({
+      patientId: userId,
+      status: { $in: ['active', 'waiting'] },
+      helperType: 'counselor'
+    });
+
+    if (existingSession) {
+      console.log(`User ${userId} already has active counselor session ${existingSession._id}`);
+      
+      // If existing session is not critical, escalate it
+      if (existingSession.severity !== 'critical') {
+        await existingSession.escalateSession('critical', `Crisis detected: ${alert.triggerContent.keywords.join(', ')}`);
+        console.log(`✅ Escalated existing session ${existingSession._id} to critical`);
+      }
+      
+      return existingSession;
+    }
+
+    // Create new critical counselor session using the same logic as the API endpoint
+    const crisisSession = new Session({
+      patientId: userId,
+      helperId: null, // Will be assigned when counselor accepts
+      helperType: 'counselor',
+      severity: 'critical',
+      status: 'waiting',
+      title: 'Critical - Crisis Support Needed',
+      description: `🚨 AUTOMATIC CRISIS ESCALATION: User message contained crisis indicators. Keywords detected: ${alert.triggerContent.keywords.join(', ')}. AI Confidence: ${Math.round(alert.triggerContent.confidence * 100)}%. User needs immediate professional support.`,
+      isPrivate: true,
+      maxParticipants: 2,
+      metadata: {
+        crisisAlertId: alert._id,
+        autoCreated: true,
+        crisisConfidence: alert.triggerContent.confidence,
+        triggerKeywords: alert.triggerContent.keywords,
+        escalationReason: 'Automatic crisis detection in AI chatbot conversation',
+        emergencyContacted: false,
+        priorityLevel: 'emergency'
+      }
+    });
+
+    await crisisSession.save();
+    await crisisSession.populate('patientId', 'username profile');
+
+    console.log(`🚨 Created CRITICAL counselor session ${crisisSession._id} for user ${userId}`);
+    console.log(`📋 Session details: ${crisisSession.title} | Status: ${crisisSession.status} | Severity: ${crisisSession.severity}`);
+    
+    // Update the crisis alert with session reference
+    alert.metadata = alert.metadata || {};
+    alert.metadata.counselorSessionCreated = true;
+    alert.metadata.counselorSessionId = crisisSession._id;
+    await alert.save();
+
+    return crisisSession;
+  } catch (error) {
+    console.error('❌ Error creating critical counselor request:', error);
+    throw error;
   }
 };
 

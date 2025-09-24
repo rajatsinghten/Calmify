@@ -582,6 +582,62 @@ class ApiService {
     return this.handleResponse<any>(response);
   }
 
+  async getChatHistory(limit?: number): Promise<any> {
+    const params = new URLSearchParams();
+    if (limit) {
+      params.append('limit', limit.toString());
+    }
+
+    const response = await fetch(`${API_BASE_URL}/ai/chats?${params}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async createNewChat(title?: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/ai/chats/new`, {
+      method: 'POST',
+      headers: {
+        ...this.getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: title || 'New Chat'
+      }),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async getChat(chatId: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/ai/chats/${chatId}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async getActiveChat(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/ai/chats/active/current`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async closeChat(chatId: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/ai/chats/${chatId}/close`, {
+      method: 'PATCH',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
   // Notes APIs
   async getNotes(filters?: {
     patientId?: string;

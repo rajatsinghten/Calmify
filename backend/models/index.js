@@ -6,6 +6,7 @@ const Questionnaire = require('./Questionnaire');
 const Response = require('./Response');
 const Assessment = require('./Assessment');
 const Note = require('./Note');
+const AIChat = require('./AIChat');
 
 module.exports = {
   User,
@@ -15,5 +16,6 @@ module.exports = {
   Questionnaire,
   Response,
   Assessment,
-  Note
+  Note,
+  AIChat
 };

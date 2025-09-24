@@ -165,13 +165,39 @@ sessionSchema.statics.findPendingSessions = function(helperType = null, severity
     query.severity = severity;
   }
   
-  return this.find(query)
-    .populate('patientId', 'username profile anonymousId')
-    .sort({ 
-      severity: -1, // Higher severity first (critical, severe, moderate, mild)
-      createdAt: 1  // Older sessions first within same severity
-    })
-    .limit(limit);
+  // Custom sorting to prioritize critical sessions
+  const pipeline = [
+    { $match: query },
+    {
+      $addFields: {
+        severityOrder: {
+          $switch: {
+            branches: [
+              { case: { $eq: ['$severity', 'critical'] }, then: 4 },
+              { case: { $eq: ['$severity', 'severe'] }, then: 3 },
+              { case: { $eq: ['$severity', 'moderate'] }, then: 2 },
+              { case: { $eq: ['$severity', 'mild'] }, then: 1 }
+            ],
+            default: 0
+          }
+        }
+      }
+    },
+    { $sort: { severityOrder: -1, createdAt: 1 } },
+    { $limit: limit },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'patientId',
+        foreignField: '_id',
+        as: 'patientId',
+        pipeline: [{ $project: { username: 1, profile: 1, anonymousId: 1 } }]
+      }
+    },
+    { $unwind: '$patientId' }
+  ];
+  
+  return this.aggregate(pipeline);
 };
 
 // Static method to find helper's active sessions

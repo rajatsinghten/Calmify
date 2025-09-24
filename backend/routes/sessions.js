@@ -151,7 +151,12 @@ router.get('/available',
         parseInt(limit)
       );
 
-      console.log(`Found ${sessions.length} available sessions for ${req.user.role}`);
+      console.log(`🔍 Session query for ${req.user.role}:`, {
+        helperType: helperType || req.user.role,
+        severity: severity || 'all',
+        foundSessions: sessions.length,
+        sessionTitles: sessions.map(s => s.title)
+      });
 
       // Add waiting time to each session
       const sessionsWithWaitTime = sessions.map(session => {
@@ -915,6 +920,45 @@ router.post('/:sessionId/leave',
         error: 'Failed to leave session',
         details: error.message
       });
+    }
+  }
+);
+
+// DEBUG: List all sessions (temporary endpoint for debugging)
+router.get('/debug/all',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      // Only allow for admins or in development
+      if (req.user.role !== 'admin' && process.env.NODE_ENV === 'production') {
+        return res.status(403).json({ error: 'Debug endpoint not available in production' });
+      }
+
+      const sessions = await Session.find({})
+        .populate('patientId', 'username profile')
+        .populate('helperId', 'username profile')
+        .sort({ createdAt: -1 })
+        .limit(50);
+
+      const sessionSummary = sessions.map(s => ({
+        id: s._id,
+        title: s.title,
+        helperType: s.helperType,
+        severity: s.severity,
+        status: s.status,
+        patientUsername: s.patientId?.username,
+        helperUsername: s.helperId?.username || 'none',
+        createdAt: s.createdAt,
+        autoCreated: s.metadata?.autoCreated || false
+      }));
+
+      res.json({
+        message: `Found ${sessions.length} sessions`,
+        sessions: sessionSummary
+      });
+    } catch (error) {
+      console.error('Debug sessions error:', error);
+      res.status(500).json({ error: 'Failed to get debug sessions' });
     }
   }
 );

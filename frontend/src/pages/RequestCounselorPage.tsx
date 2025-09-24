@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { apiService } from "../services/api";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Loader2, MessageCircle, UserCheck, Clock, Shield, CheckCircle, Star } from "lucide-react";
+import { Loader2, MessageCircle, UserCheck, Clock, Shield, CheckCircle, Star, AlertTriangle } from "lucide-react";
 
 interface Session {
   _id: string;
@@ -27,6 +27,7 @@ interface Session {
 export default function RequestCounselorPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -49,8 +50,21 @@ export default function RequestCounselorPage() {
       return;
     }
 
+    // Handle crisis detection redirect
+    if (location.state?.fromCrisisDetection) {
+      const crisisInfo = location.state.crisisInfo;
+      setTitle("Critical - Crisis Support Needed");
+      setDescription(`🚨 URGENT: Crisis indicators were detected in your AI chat conversation. Professional counseling support is needed immediately. 
+
+Crisis confidence: ${crisisInfo.confidence}%
+Conversation ID: ${location.state.conversationId}
+
+Please proceed with this counselor request for immediate professional support.`);
+      setSeverity('critical');
+    }
+
     checkActiveSession();
-  }, [isAuthenticated, user, navigate, isLoading]);
+  }, [isAuthenticated, user, navigate, isLoading, location.state]);
 
   const checkActiveSession = async () => {
     try {
@@ -182,13 +196,29 @@ export default function RequestCounselorPage() {
             </Alert>
           )}
 
+          {/* Crisis Alert if redirected from chatbot */}
+          {location.state?.fromCrisisDetection && (
+            <Alert className="border-red-500 bg-red-50 mb-6">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="text-red-800 font-medium">
+                🚨 <strong>Crisis Detected:</strong> Based on your AI chat conversation, we've identified that you may need immediate professional support. This counselor request has been pre-filled with crisis priority.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Request Form */}
           {!activeSession && (
             <Card>
               <CardHeader>
-                <CardTitle>Request Professional Counseling</CardTitle>
+                <CardTitle className={location.state?.fromCrisisDetection ? "text-red-700 flex items-center gap-2" : ""}>
+                  {location.state?.fromCrisisDetection && <AlertTriangle className="h-5 w-5" />}
+                  {location.state?.fromCrisisDetection ? "URGENT: Crisis Support Request" : "Request Professional Counseling"}
+                </CardTitle>
                 <p className="text-muted-foreground">
-                  Schedule a session with a licensed mental health professional
+                  {location.state?.fromCrisisDetection 
+                    ? "This request has been escalated due to crisis indicators in your conversation"
+                    : "Schedule a session with a licensed mental health professional"
+                  }
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">

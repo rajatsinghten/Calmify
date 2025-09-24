@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { apiService } from "../services/api";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  Calendar
+  Calendar,
+  Archive,
+  CheckCircle
 } from "lucide-react";
 import { format, formatDistance } from "date-fns";
 
@@ -30,20 +33,25 @@ interface Message {
   isBot: boolean;
   timestamp: Date;
   crisisDetected?: boolean;
+  crisisInfo?: {
+    severity: string;
+    confidence: number;
+    redirectToCounselor: boolean;
+  };
 }
 
 interface ChatSession {
-  id: string;
+  _id: string;
   title: string;
-  lastMessage: string;
-  timestamp: Date;
+  lastMessageAt: Date;
   messageCount: number;
   crisisDetected?: boolean;
-  isActive?: boolean;
+  createdAt: Date;
 }
 
 export default function ChatbotPage() {
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -52,67 +60,86 @@ export default function ChatbotPage() {
   const [crisisDetected, setCrisisDetected] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string>("current");
+  const [pastSessions, setPastSessions] = useState<ChatSession[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [activeChat, setActiveChat] = useState<any>(null);
+  const [loadingActiveChat, setLoadingActiveChat] = useState(false);
+  const [crisisEscalated, setCrisisEscalated] = useState(false);
+  const [bookedCounselorMessageIds, setBookedCounselorMessageIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Dummy past chat sessions
-  const [pastSessions] = useState<ChatSession[]>([
-    {
-      id: "session-1",
-      title: "Dealing with Exam Stress",
-      lastMessage: "Thank you for helping me understand different coping strategies for managing exam anxiety. I feel much more prepared now.",
-      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-      messageCount: 24,
-      crisisDetected: false
-    },
-    {
-      id: "session-2", 
-      title: "Work-Life Balance Issues",
-      lastMessage: "The boundary-setting techniques you suggested have really helped me separate work stress from my personal time.",
-      timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-      messageCount: 31,
-      crisisDetected: false
-    },
-    {
-      id: "session-3",
-      title: "Relationship Concerns",
-      lastMessage: "I appreciate your guidance on communication strategies. The active listening tips were particularly helpful.",
-      timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
-      messageCount: 18,
-      crisisDetected: false
-    },
-    {
-      id: "session-4",
-      title: "Feeling Overwhelmed",
-      lastMessage: "Thank you for recognizing my distress and providing those crisis resources. I'm feeling more stable now.",
-      timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
-      messageCount: 42,
-      crisisDetected: true
-    },
-    {
-      id: "session-5",
-      title: "Sleep and Anxiety Issues",
-      lastMessage: "The sleep hygiene recommendations and breathing exercises have improved my sleep quality significantly.",
-      timestamp: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), // 2 weeks ago
-      messageCount: 27,
-      crisisDetected: false
-    },
-    {
-      id: "session-6",
-      title: "Building Self-Confidence",
-      lastMessage: "I've been practicing the positive self-talk techniques you taught me, and I'm starting to notice small improvements.",
-      timestamp: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000), // 3 weeks ago
-      messageCount: 35,
-      crisisDetected: false
-    }
-  ]);
+
 
   useEffect(() => {
-    initializeChat();
+    if (isAuthenticated) {
+      loadChatHistory();
+      loadActiveChat();
+    }
   }, [isAuthenticated]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const loadChatHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      const response = await apiService.getChatHistory(20);
+      
+      console.log('Chat history response:', response); // Debug log
+      
+      if (response.success && response.data) {
+        console.log('Loaded past sessions:', response.data); // Debug log
+        setPastSessions(response.data);
+      } else {
+        console.warn('No chat history data received:', response);
+        setPastSessions([]);
+      }
+    } catch (error) {
+      console.error('Failed to load chat history:', error);
+      setPastSessions([]);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const loadActiveChat = async () => {
+    try {
+      setLoadingActiveChat(true);
+      const response = await apiService.getActiveChat();
+      
+      console.log('Active chat response:', response); // Debug log
+      
+      if (response.success && response.data) {
+        console.log('Found active chat:', response.data); // Debug log
+        setActiveChat(response.data);
+        setConversationId(response.data._id);
+        
+        // Load messages from active chat
+        if (response.data.messages && response.data.messages.length > 0) {
+          const convertedMessages: Message[] = response.data.messages.map((msg: any, index: number) => ({
+            id: `${msg.role}-${index}`,
+            text: msg.content,
+            isBot: msg.role === 'assistant',
+            timestamp: new Date(msg.timestamp),
+            crisisDetected: msg.crisisDetected || false
+          }));
+          setMessages(convertedMessages);
+          setCrisisDetected(response.data.crisisDetected || false);
+        } else {
+          initializeChat();
+        }
+      } else {
+        console.log('No active chat found, initializing new one');
+        initializeChat();
+      }
+    } catch (error) {
+      console.error('Failed to load active chat:', error);
+      initializeChat();
+    } finally {
+      setLoadingActiveChat(false);
+    }
+  };
 
   const initializeChat = () => {
     // Add welcome message
@@ -147,11 +174,18 @@ export default function ChatbotPage() {
         // Update conversation ID if this is the first message
         if (!conversationId && response.data.conversationId) {
           setConversationId(response.data.conversationId);
+          // Keep currentSessionId as "current" for active sessions
+          // Update active chat info
+          setActiveChat({
+            _id: response.data.conversationId,
+            title: response.data.title || 'New Chat'
+          });
         }
 
         // Check for crisis detection
         if (response.data.crisisDetected) {
           setCrisisDetected(true);
+          console.log('🚨 Crisis detected in chat:', response.data.crisisInfo);
         }
 
         const botMessage: Message = {
@@ -159,7 +193,8 @@ export default function ChatbotPage() {
           text: response.data.response,
           isBot: true,
           timestamp: new Date(),
-          crisisDetected: response.data.crisisDetected
+          crisisDetected: response.data.crisisDetected,
+          crisisInfo: response.data.crisisInfo
         };
 
         setMessages(prev => [...prev, botMessage]);
@@ -182,49 +217,108 @@ export default function ChatbotPage() {
     }
   };
 
+  const handleBookCounselor = (crisisInfo: any, messageId: string) => {
+    setBookedCounselorMessageIds(prev => new Set([...prev, messageId]));
+    
+    // Redirect to the external counselor request URL
+    window.location.href = 'http://localhost:8080/counselor/request';
+  };
+
   const clearChat = () => {
     setMessages([]);
     setConversationId(null);
     setCrisisDetected(false);
+    setCrisisEscalated(false);
     setCurrentSessionId("current");
+    setActiveChat(null);
+    setBookedCounselorMessageIds(new Set());
     initializeChat();
   };
 
-  const startNewChat = () => {
-    clearChat();
+  const startNewChat = async () => {
+    try {
+      setLoading(true);
+      console.log('Starting new chat...'); // Debug log
+      
+      // First close current active chat if it exists
+      if (activeChat && activeChat._id) {
+        await closeSession();
+      }
+      
+      // Clear current session and initialize new one
+      clearChat();
+      setActiveChat(null);
+      console.log('New chat started successfully'); // Debug log
+    } catch (error) {
+      console.error('Failed to start new chat:', error);
+      // Fallback to just clearing current chat
+      clearChat();
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const loadPastSession = (sessionId: string) => {
-    setCurrentSessionId(sessionId);
-    const session = pastSessions.find(s => s.id === sessionId);
-    
-    if (session) {
-      // Generate dummy conversation for the selected session
-      const dummyMessages: Message[] = [
-        {
-          id: 'welcome',
-          text: `Hello${user?.profile?.preferredName ? ` ${user.profile.preferredName}` : ''}! I'm Dr. Sarah. I see we're continuing our conversation about "${session.title}". How are you feeling today?`,
-          isBot: true,
-          timestamp: new Date(session.timestamp.getTime() - 60000)
-        },
-        {
-          id: 'user-1',
-          text: "Thank you for continuing to help me with this. I've been thinking about our last conversation.",
-          isBot: false,
-          timestamp: new Date(session.timestamp.getTime() - 30000)
-        },
-        {
-          id: 'bot-1',
-          text: session.lastMessage,
-          isBot: true,
-          timestamp: session.timestamp,
-          crisisDetected: session.crisisDetected
-        }
-      ];
+  const closeSession = async () => {
+    try {
+      if (!activeChat || !activeChat._id) {
+        console.log('No active chat to close');
+        return;
+      }
+
+      setLoading(true);
+      console.log('Closing session:', activeChat._id); // Debug log
       
-      setMessages(dummyMessages);
-      setCrisisDetected(session.crisisDetected || false);
-      setConversationId(sessionId);
+      const response = await apiService.closeChat(activeChat._id);
+      console.log('Close session response:', response); // Debug log
+      
+      if (response.success) {
+        // Reload chat history to include the now-closed chat
+        await loadChatHistory();
+        
+        // Clear current session
+        clearChat();
+        setActiveChat(null);
+        console.log('Session closed successfully'); // Debug log
+      } else {
+        console.warn('Failed to close session:', response);
+      }
+    } catch (error) {
+      console.error('Failed to close session:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPastSession = async (sessionId: string) => {
+    try {
+      setLoading(true);
+      setCurrentSessionId(sessionId);
+      
+      const response = await apiService.getChat(sessionId);
+      
+      if (response.success && response.data) {
+        const chatData = response.data;
+        
+        // Convert API messages to UI format
+        const convertedMessages: Message[] = chatData.messages.map((msg: any, index: number) => ({
+          id: `${msg.role}-${index}`,
+          text: msg.content,
+          isBot: msg.role === 'assistant',
+          timestamp: new Date(msg.timestamp),
+          crisisDetected: msg.crisisDetected || false
+        }));
+        
+        setMessages(convertedMessages);
+        setCrisisDetected(chatData.crisisDetected || false);
+        setConversationId(sessionId);
+      }
+    } catch (error) {
+      console.error('Failed to load past session:', error);
+      // Fallback to current session
+      setCurrentSessionId("current");
+      initializeChat();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -262,8 +356,13 @@ export default function ChatbotPage() {
               onClick={startNewChat}
               className="w-full"
               variant="outline"
+              disabled={loading}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              {loading ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
               New Chat
             </Button>
           </div>
@@ -273,49 +372,66 @@ export default function ChatbotPage() {
             <ScrollArea className="h-full">
               <div className="p-2 space-y-2">
                 {/* Current Session */}
-                <Card 
-                  className={`p-3 cursor-pointer transition-colors hover:bg-accent/50 ${
-                    currentSessionId === "current" ? "bg-primary/10 border-primary/20" : ""
-                  }`}
-                  onClick={() => {
-                    setCurrentSessionId("current");
-                    initializeChat();
-                  }}
-                >
-                  <div className="flex items-start gap-2">
-                    <MessageCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm text-foreground truncate">
-                        Current Session
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Active now
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {messages.length} messages
-                        </Badge>
-                        {crisisDetected && (
-                          <Badge variant="destructive" className="text-xs">
-                            Crisis
+                {(activeChat || currentSessionId === "current") && (
+                  <Card 
+                    className={`p-3 cursor-pointer transition-colors hover:bg-accent/50 ${
+                      currentSessionId === "current" ? "bg-primary/10 border-primary/20" : ""
+                    }`}
+                    onClick={() => {
+                      setCurrentSessionId("current");
+                      if (activeChat) {
+                        loadActiveChat();
+                      } else {
+                        initializeChat();
+                      }
+                    }}
+                  >
+                    <div className="flex items-start gap-2">
+                      <MessageCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm text-foreground truncate">
+                          {activeChat?.title || "Current Session"}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {activeChat ? "Active conversation" : "Start new conversation"}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {messages.length} messages
                           </Badge>
-                        )}
+                          {crisisDetected && (
+                            <Badge variant="destructive" className="text-xs">
+                              Crisis
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Card>
+                  </Card>
+                )}
 
                 <Separator className="my-2" />
                 <p className="text-xs text-muted-foreground px-2 mb-2">Previous Sessions</p>
 
                 {/* Past Sessions */}
-                {pastSessions.map((session) => (
+                {loadingHistory ? (
+                  <div className="p-4 text-center">
+                    <RefreshCw className="h-4 w-4 animate-spin mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">Loading chat history...</p>
+                  </div>
+                ) : pastSessions.length === 0 ? (
+                  <div className="p-4 text-center">
+                    <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">No previous sessions</p>
+                    <p className="text-xs text-muted-foreground">Start chatting to create history</p>
+                  </div>
+                ) : pastSessions.map((session) => (
                   <Card 
-                    key={session.id}
+                    key={session._id}
                     className={`p-3 cursor-pointer transition-colors hover:bg-accent/50 ${
-                      currentSessionId === session.id ? "bg-primary/10 border-primary/20" : ""
+                      currentSessionId === session._id ? "bg-primary/10 border-primary/20" : ""
                     }`}
-                    onClick={() => loadPastSession(session.id)}
+                    onClick={() => loadPastSession(session._id)}
                   >
                     <div className="flex items-start gap-2">
                       <MessageCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
@@ -324,12 +440,12 @@ export default function ChatbotPage() {
                           {session.title}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {session.lastMessage}
+                          Last activity: {formatDistance(new Date(session.lastMessageAt), new Date(), { addSuffix: true })}
                         </p>
                         <div className="flex items-center gap-2 mt-2">
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Clock className="h-3 w-3" />
-                            {formatDistance(session.timestamp, new Date(), { addSuffix: true })}
+                            {formatDistance(new Date(session.createdAt), new Date(), { addSuffix: true })}
                           </div>
                           <Badge variant="secondary" className="text-xs">
                             {session.messageCount}
@@ -369,12 +485,18 @@ export default function ChatbotPage() {
           <div className="bg-white border-b border-border p-4 flex justify-between items-center flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <Bot className="h-6 w-6 text-primary" />
+                {loadingActiveChat ? (
+                  <RefreshCw className="h-5 w-5 text-primary animate-spin" />
+                ) : (
+                  <Bot className="h-6 w-6 text-primary" />
+                )}
               </div>
               <div>
                 <h1 className="text-lg font-semibold text-foreground">Dr. Sarah - AI Psychology Expert</h1>
                 <p className="text-sm text-muted-foreground">
-                  {crisisDetected 
+                  {loadingActiveChat 
+                    ? "Loading conversation..." 
+                    : crisisDetected 
                     ? "Crisis support mode - I'm here to help" 
                     : "Compassionate mental health support"}
                 </p>
@@ -386,15 +508,22 @@ export default function ChatbotPage() {
                   Past Session
                 </Badge>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearChat}
-                className="text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                New Chat
-              </Button>
+              {activeChat && currentSessionId === "current" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={closeSession}
+                  disabled={loading || !activeChat._id}
+                  className="text-orange-600 hover:bg-orange-50"
+                >
+                  {loading ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Archive className="h-4 w-4 mr-2" />
+                  )}
+                  Close Session
+                </Button>
+              )}
             </div>
           </div>
 
@@ -407,6 +536,21 @@ export default function ChatbotPage() {
                   <p className="text-sm font-medium text-destructive">Crisis Support Resources</p>
                   <p className="text-sm text-destructive/80">
                     If you're in immediate danger, please call 911. For crisis support: National Suicide Prevention Lifeline at 988, or Crisis Text Line by texting HOME to 741741.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Crisis Escalation Alert */}
+          {crisisEscalated && (
+            <div className="bg-orange-50 border-l-4 border-orange-500 p-4 mx-4 mt-2 rounded flex-shrink-0">
+              <div className="flex items-start gap-2">
+                <MessageCircle className="h-5 w-5 text-orange-600 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-orange-800">🚨 Crisis Support Team Notified</p>
+                  <p className="text-sm text-orange-700 mt-1">
+                    Your message has been automatically escalated to our crisis support team. A counselor will reach out to you very soon to provide immediate assistance.
                   </p>
                 </div>
               </div>
@@ -435,6 +579,39 @@ export default function ChatbotPage() {
                           : 'bg-blue-50 border border-blue-200'
                       } ${message.crisisDetected ? 'border-l-4 border-l-destructive' : ''}`}>
                         <p className="text-sm text-foreground whitespace-pre-wrap">{message.text}</p>
+                        
+                        {/* Crisis Counselor Booking Button */}
+                        {message.crisisDetected && message.crisisInfo?.redirectToCounselor && (
+                          <div className="mt-3 pt-3 border-t border-red-200 bg-red-50 rounded-b-lg -mx-3 -mb-3 px-3 pb-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertTriangle className="h-4 w-4 text-red-600" />
+                              <p className="text-xs text-red-700 font-semibold">Crisis Support Available</p>
+                            </div>
+                            {bookedCounselorMessageIds.has(message.id) ? (
+                              <Button 
+                                disabled
+                                className="w-full bg-green-600 text-white shadow-sm cursor-default"
+                                size="sm"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Counselor Request Submitted
+                              </Button>
+                            ) : (
+                              <Button 
+                                onClick={() => handleBookCounselor(message.crisisInfo, message.id)}
+                                className="w-full bg-red-600 hover:bg-red-700 text-white shadow-sm animate-pulse hover:animate-none"
+                                size="sm"
+                              >
+                                <MessageCircle className="h-4 w-4 mr-2" />
+                                Book Emergency Counselor Session
+                              </Button>
+                            )}
+                            <p className="text-xs text-red-600 mt-1 text-center">
+                              Confidence: {message.crisisInfo.confidence}% • Professional help available now
+                            </p>
+                          </div>
+                        )}
+                        
                         <p className="text-xs text-muted-foreground mt-1">
                           {formatTime(message.timestamp)}
                         </p>
@@ -475,12 +652,12 @@ export default function ChatbotPage() {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={currentSessionId === "current" ? "Share what's on your mind..." : "This is a past session (read-only)"}
-                disabled={isTyping || currentSessionId !== "current"}
+                disabled={isTyping || currentSessionId !== "current" || loadingActiveChat}
                 className="flex-1"
               />
               <Button 
                 onClick={sendMessage} 
-                disabled={!inputMessage.trim() || isTyping || currentSessionId !== "current"}
+                disabled={!inputMessage.trim() || isTyping || currentSessionId !== "current" || loadingActiveChat}
                 size="icon"
               >
                 <Send className="h-4 w-4" />

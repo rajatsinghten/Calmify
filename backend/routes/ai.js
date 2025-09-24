@@ -1,5 +1,7 @@
 const express = require('express');
 const { auth } = require('../utils');
+const { AIChat } = require('../models');
+const { analyzeMessageForCrisis, processMessageForCrisis } = require('../utils/crisisDetection');
 const OpenAI = require('openai');
 
 const router = express.Router();
@@ -31,8 +33,7 @@ const initializeAzureOpenAI = () => {
 
 const azureOpenAIClient = initializeAzureOpenAI();
 
-// In-memory conversation storage (in production, use Redis or database)
-const conversations = new Map();
+// Database storage for conversations (replacing in-memory storage)
 
 // Psychology expert system prompt
 const PSYCHOLOGY_EXPERT_PROMPT = `You are Dr. Sarah, a compassionate and experienced clinical psychologist and mental health expert working for Calmify, a comprehensive mental health support platform. You specialize in cognitive behavioral therapy, mindfulness-based interventions, and crisis intervention.
@@ -81,23 +82,69 @@ router.post('/chat',
         });
       }
 
-      // Generate or use existing conversation ID
-      const convId = conversationId || `conv_${userId}_${Date.now()}`;
-      
-      // Get conversation history
-      let conversation = conversations.get(convId) || [];
-      
-      // Add user message to conversation
-      conversation.push({
-        role: 'user',
-        content: message.trim(),
-        timestamp: new Date()
+      // Find existing chat or create new one
+      let chat;
+      if (conversationId) {
+        chat = await AIChat.findById(conversationId);
+        if (!chat || chat.userId.toString() !== userId.toString()) {
+          return res.status(404).json({
+            success: false,
+            error: 'Chat not found'
+          });
+        }
+      } else {
+        // Check if user has an active chat first
+        chat = await AIChat.getActiveChat(userId);
+        
+        if (!chat) {
+          // Create new chat if no active chat exists
+          chat = await AIChat.createNewChat(userId);
+        }
+      }
+
+      // Add user message to chat
+      await chat.addMessage('user', message.trim());
+
+      // CRISIS DETECTION FIRST - Before AI processing
+      const crisisAnalysis = analyzeMessageForCrisis(message.trim());
+      const crisisDetected = crisisAnalysis.isCrisis;
+
+      console.log('🔍 Crisis analysis for message:', {
+        message: message.trim().substring(0, 50) + '...',
+        isCrisis: crisisDetected,
+        severity: crisisAnalysis.severity,
+        confidence: crisisAnalysis.confidence
       });
 
-      // Keep only last 20 messages to prevent context overflow
-      if (conversation.length > 20) {
-        conversation = conversation.slice(-20);
+      // If crisis detected, process for automatic escalation IMMEDIATELY
+      if (crisisDetected) {
+        console.log('🚨 Crisis detected in AI chat - processing escalation...');
+
+        try {
+          // Import additional crisis functions
+          const { createCrisisAlert } = require('../utils/crisisDetection');
+          
+          // Create crisis alert
+          const alert = await createCrisisAlert(
+            chat._id, // Use chat ID as message ID for AI chats
+            userId,
+            null, // AI chats don't have session IDs
+            crisisAnalysis
+          );
+
+          console.log('✅ Crisis alert created:', alert._id);
+
+          // For critical severity, user should be redirected to RequestCounselorPage
+          if (crisisAnalysis.severity === 'critical') {
+            console.log('� Critical crisis detected - will redirect user to RequestCounselorPage');
+          }
+        } catch (crisisError) {
+          console.error('❌ Error processing crisis message:', crisisError);
+        }
       }
+
+      // Get recent conversation history for AI context
+      const recentMessages = chat.getRecentMessages(20);
 
       let responseText;
       let isAIGenerated = false;
@@ -114,8 +161,8 @@ router.post('/chat',
           ];
 
           // Add conversation history (last 10 messages for context)
-          const recentHistory = conversation.slice(-10);
-          for (const msg of recentHistory) {
+          const contextMessages = recentMessages.slice(-10);
+          for (const msg of contextMessages) {
             messages.push({
               role: msg.role,
               content: msg.content
@@ -146,30 +193,32 @@ router.post('/chat',
         responseText = generateFallbackResponse(message.trim());
       }
 
-      // Add bot response to conversation
-      conversation.push({
-        role: 'assistant',
-        content: responseText,
-        timestamp: new Date()
-      });
+      // Add crisis response to the bot's message if crisis was detected
+      if (crisisDetected && crisisAnalysis.severity === 'critical') {
+        const crisisResponse = "\n\n🚨 I'm very concerned about what you've shared. I want to connect you with professional help right away. If this is an immediate emergency, please call 911 or the crisis hotline at 988. Let me help you request a counselor session for immediate support.";
+        responseText += crisisResponse;
+      } else if (crisisDetected && crisisAnalysis.severity === 'high') {
+        const crisisResponse = "\n\n⚠️ I'm concerned about what you've shared. Professional support is available if you need it. If this becomes urgent, please call 911 or the crisis hotline at 988. You're not alone in this.";
+        responseText += crisisResponse;
+      }
 
-      // Update conversation storage
-      conversations.set(convId, conversation);
-
-      // Check for crisis indicators
-      const crisisDetected = checkForCrisis(message.trim());
-
-      // Clean old conversations periodically
-      cleanOldConversations();
+      // Add bot response to chat with crisis information
+      await chat.addMessage('assistant', responseText, crisisDetected);
 
       res.json({
         success: true,
         data: {
           response: responseText,
-          conversationId: convId,
+          conversationId: chat._id,
           isAIGenerated,
           crisisDetected,
-          timestamp: new Date().toISOString()
+          crisisInfo: crisisDetected ? {
+            severity: crisisAnalysis.severity,
+            confidence: Math.round(crisisAnalysis.confidence * 100),
+            redirectToCounselor: crisisAnalysis.severity === 'critical'
+          } : null,
+          timestamp: new Date().toISOString(),
+          title: chat.title
         }
       });
 
@@ -188,9 +237,14 @@ router.post('/chat',
 const generateFallbackResponse = (message) => {
   const text = message.toLowerCase();
   
-  // Crisis detection
-  if (text.includes('suicide') || text.includes('kill myself') || text.includes('end my life') || text.includes('hurt myself')) {
-    return "I'm very concerned about what you've shared with me. Your life has value and there are people who want to help. Please reach out immediately: National Suicide Prevention Lifeline at 988, Crisis Text Line by texting HOME to 741741, or call 911 if you're in immediate danger. You don't have to go through this alone.";
+  // Crisis detection - use comprehensive crisis analysis
+  const crisisAnalysis = analyzeMessageForCrisis(message);
+  if (crisisAnalysis.isCrisis) {
+    if (crisisAnalysis.severity === 'critical') {
+      return "I'm very concerned about what you've shared with me. Your life has value and there are people who want to help. I've immediately notified our crisis support team and they will reach out to you very soon. For immediate help: National Suicide Prevention Lifeline at 988, Crisis Text Line by texting HOME to 741741, or call 911 if you're in immediate danger. You don't have to go through this alone.";
+    } else {
+      return "I'm concerned about what you've shared, and I want you to know that support is available. Our team has been notified and someone will reach out to provide additional help. In the meantime, if you need immediate support: 988 for crisis support, or text HOME to 741741. You matter, and there are people who care about you.";
+    }
   }
 
   // Greeting
@@ -232,33 +286,156 @@ const generateFallbackResponse = (message) => {
   return "Thank you for sharing that with me. I can hear that this is important to you, and I want to make sure I understand what you're going through. Your feelings and experiences matter. Can you tell me a bit more about what's on your mind or how you've been feeling lately?";
 };
 
-// Check for crisis indicators in messages
-const checkForCrisis = (message) => {
-  const crisisKeywords = [
-    'suicide', 'kill myself', 'end my life', 'hurt myself', 'want to die',
-    'no point living', 'better off dead', 'end it all', 'overdose',
-    'cutting', 'self harm', 'jumping', 'hanging'
-  ];
-  
-  const text = message.toLowerCase();
-  return crisisKeywords.some(keyword => text.includes(keyword));
-};
+// Crisis detection is now handled by the comprehensive crisisDetection utility
 
-// Clean old conversations to prevent memory buildup
-const cleanOldConversations = () => {
-  const cutoffTime = Date.now() - (24 * 60 * 60 * 1000); // 24 hours
-  
-  for (const [convId, conversation] of conversations.entries()) {
-    if (conversation.length > 0) {
-      const lastMessage = conversation[conversation.length - 1];
-      if (lastMessage.timestamp.getTime() < cutoffTime) {
-        conversations.delete(convId);
-      }
+// Get user's chat history
+router.get('/chats',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const limit = parseInt(req.query.limit) || 20;
+
+      const chats = await AIChat.getUserChatHistory(userId, limit);
+
+      res.json({
+        success: true,
+        data: chats
+      });
+    } catch (error) {
+      console.error('Get chat history error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get chat history'
+      });
     }
   }
-};
+);
 
-// Clean conversations every hour
-setInterval(cleanOldConversations, 60 * 60 * 1000);
+// Create new chat
+router.post('/chats/new',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { title } = req.body;
+
+      const chat = await AIChat.createNewChat(userId, title);
+
+      res.json({
+        success: true,
+        data: {
+          id: chat._id,
+          title: chat.title,
+          createdAt: chat.createdAt
+        }
+      });
+    } catch (error) {
+      console.error('Create new chat error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to create new chat'
+      });
+    }
+  }
+);
+
+// Get specific chat with messages
+router.get('/chats/:chatId',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { chatId } = req.params;
+
+      const chat = await AIChat.findById(chatId);
+      
+      if (!chat || chat.userId.toString() !== userId.toString()) {
+        return res.status(404).json({
+          success: false,
+          error: 'Chat not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          id: chat._id,
+          title: chat.title,
+          messages: chat.messages,
+          crisisDetected: chat.crisisDetected,
+          createdAt: chat.createdAt,
+          lastMessageAt: chat.lastMessageAt
+        }
+      });
+    } catch (error) {
+      console.error('Get chat error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get chat'
+      });
+    }
+  }
+);
+
+// Get active chat
+router.get('/chats/active/current',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+
+      const chat = await AIChat.getActiveChat(userId);
+
+      res.json({
+        success: true,
+        data: chat || null
+      });
+    } catch (error) {
+      console.error('Get active chat error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get active chat'
+      });
+    }
+  }
+);
+
+// Close chat session
+router.patch('/chats/:chatId/close',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { chatId } = req.params;
+
+      const chat = await AIChat.findById(chatId);
+      
+      if (!chat || chat.userId.toString() !== userId.toString()) {
+        return res.status(404).json({
+          success: false,
+          error: 'Chat not found'
+        });
+      }
+
+      await chat.markInactive();
+
+      res.json({
+        success: true,
+        data: {
+          id: chat._id,
+          title: chat.title,
+          isActive: chat.isActive
+        }
+      });
+    } catch (error) {
+      console.error('Close chat error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to close chat'
+      });
+    }
+  }
+);
 
 module.exports = router;
