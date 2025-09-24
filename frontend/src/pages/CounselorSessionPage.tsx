@@ -55,7 +55,7 @@ interface Message {
 }
 
 export default function CounselorSessionPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const [availableSessions, setAvailableSessions] = useState<Session[]>([]);
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
@@ -72,13 +72,16 @@ export default function CounselorSessionPage() {
   const socket = useChatSocket(currentSession?._id);
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking authentication
+    if (isLoading) return;
+    
     if (!isAuthenticated || user?.role !== 'counselor') {
       navigate('/login');
       return;
     }
     
     loadAvailableSessions();
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, isLoading]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

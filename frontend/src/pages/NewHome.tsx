@@ -5,16 +5,19 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function NewHome() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    // Wait for auth to finish loading before redirecting
+    if (isLoading) return;
+    
     // Redirect authenticated users to dashboard
     if (isAuthenticated) {
       navigate('/dashboard');
       return;
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, isLoading]);
 
   useEffect(() => {
     const handleScroll = () => {

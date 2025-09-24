@@ -17,7 +17,7 @@ import { useChatSocket } from '../hooks/useSocket';
 export default function SessionDetailsPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [session, setSession] = useState<Session | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -39,6 +39,9 @@ export default function SessionDetailsPage() {
   const messages = socketMessages;
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking authentication
+    if (isLoading) return;
+    
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -47,7 +50,7 @@ export default function SessionDetailsPage() {
     if (sessionId) {
       loadSession();
     }
-  }, [sessionId, isAuthenticated]);
+  }, [sessionId, isAuthenticated, isLoading]);
 
   const loadSession = async () => {
     try {

@@ -25,7 +25,7 @@ interface Session {
 }
 
 export default function RequestPeerSupportPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [title, setTitle] = useState("");
@@ -36,6 +36,9 @@ export default function RequestPeerSupportPage() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking authentication
+    if (isLoading) return;
+    
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -47,7 +50,7 @@ export default function RequestPeerSupportPage() {
     }
 
     checkActiveSession();
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, isLoading]);
 
   const checkActiveSession = async () => {
     try {
