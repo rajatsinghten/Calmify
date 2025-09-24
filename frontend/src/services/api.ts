@@ -781,6 +781,40 @@ class ApiService {
     // Return the data array directly for easier consumption
     return result.success ? result.data : [];
   }
+
+  // Admin Analytics APIs
+  async getAdminAnalytics(timeRange?: string): Promise<any> {
+    const params = timeRange ? `?timeRange=${timeRange}` : '';
+    const response = await fetch(`${API_BASE_URL}/admin/analytics/overview${params}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    const result = await this.handleResponse<any>(response);
+    return result.data; // Extract the data field from the response
+  }
+
+  async getCrisisAnalytics(timeRange?: string): Promise<any> {
+    const params = timeRange ? `?timeRange=${timeRange}` : '';
+    const response = await fetch(`${API_BASE_URL}/admin/analytics/crisis${params}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    const result = await this.handleResponse<any>(response);
+    return result.data; // Extract the data field from the response
+  }
+
+  async getUserAnalytics(timeRange?: string): Promise<any> {
+    const params = timeRange ? `?timeRange=${timeRange}` : '';
+    const response = await fetch(`${API_BASE_URL}/admin/analytics/users${params}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    const result = await this.handleResponse<any>(response);
+    return result.data; // Extract the data field from the response
+  }
 }
 
 export const apiService = new ApiService();
