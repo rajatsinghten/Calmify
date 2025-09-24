@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send, MessageCircle, Clock, User, Star, AlertTriangle } from "lucide-react";
+import { Loader2, Send, MessageCircle, Clock, User, Star, AlertTriangle, XCircle } from "lucide-react";
 import { useChatSocket } from '../hooks/useSocket';
 
 export default function SessionDetailsPage() {
@@ -26,6 +26,10 @@ export default function SessionDetailsPage() {
   const [showEscalateDialog, setShowEscalateDialog] = useState(false);
   const [escalationReason, setEscalationReason] = useState('');
   const [escalating, setEscalating] = useState(false);
+  const [showCloseDialog, setShowCloseDialog] = useState(false);
+  const [closeRating, setCloseRating] = useState<number>(0);
+  const [closeFeedback, setCloseFeedback] = useState('');
+  const [closing, setClosing] = useState(false);
   
   // Ref for auto-scrolling to bottom of messages
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -163,6 +167,43 @@ export default function SessionDetailsPage() {
       setError('Failed to escalate session');
     } finally {
       setEscalating(false);
+    }
+  };
+
+  const openCloseDialog = () => {
+    setShowCloseDialog(true);
+  };
+
+  const handleCloseSession = async () => {
+    if (!session) return;
+
+    try {
+      setClosing(true);
+      
+      // Close the session via API
+      await apiService.closeSession(
+        session._id,
+        closeRating || undefined,
+        closeFeedback.trim() || "Session completed successfully"
+      );
+      
+      setShowCloseDialog(false);
+      setCloseRating(0);
+      setCloseFeedback('');
+      
+      // Navigate based on user role
+      if (user?.role === 'peer') {
+        navigate('/peer/chats');
+      } else if (user?.role === 'counselor') {
+        navigate('/counselor/sessions');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Failed to close session:', error);
+      setError('Failed to close session');
+    } finally {
+      setClosing(false);
     }
   };
 
@@ -351,22 +392,41 @@ export default function SessionDetailsPage() {
                     )}
                   </CardTitle>
                   
-                  {/* Escalation Button - Only show for active peer sessions */}
-                  {user?.role === 'peer' && 
-                   session.helperType === 'peer' && 
-                   session.status === 'active' && 
-                   isHelper && (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={openEscalateDialog}
-                      className="text-orange-600 border-orange-300 hover:bg-orange-50"
-                      disabled={escalating}
-                    >
-                      <AlertTriangle className="h-4 w-4 mr-2" />
-                      Escalate to Counselor
-                    </Button>
-                  )}
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    {/* Close Session Button - Show for active sessions when user is helper */}
+                    {((user?.role === 'peer' && session.helperType === 'peer') || 
+                      (user?.role === 'counselor' && session.helperType === 'counselor')) && 
+                     session.status === 'active' && 
+                     isHelper && (
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        onClick={openCloseDialog}
+                        disabled={closing}
+                      >
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Close Session
+                      </Button>
+                    )}
+
+                    {/* Escalation Button - Only show for active peer sessions */}
+                    {user?.role === 'peer' && 
+                     session.helperType === 'peer' && 
+                     session.status === 'active' && 
+                     isHelper && (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={openEscalateDialog}
+                        className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                        disabled={escalating}
+                      >
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Escalate to Counselor
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
 
@@ -557,6 +617,76 @@ export default function SessionDetailsPage() {
                   <AlertTriangle className="h-4 w-4 mr-2" />
                   Escalate to Counselor
                 </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Close Session Dialog */}
+      <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-red-500" />
+              Close Session Permanently
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to close this session permanently? This action cannot be undone. The patient will be notified that the session has ended.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="rating">Session Rating (optional)</Label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setCloseRating(star)}
+                    className={`w-8 h-8 flex items-center justify-center ${
+                      star <= closeRating 
+                        ? 'text-yellow-400' 
+                        : 'text-gray-300'
+                    }`}
+                    title={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                  >
+                    <Star className={`w-6 h-6 ${star <= closeRating ? 'fill-current' : ''}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="feedback">Session Summary (optional)</Label>
+              <Textarea
+                id="feedback"
+                value={closeFeedback}
+                onChange={(e) => setCloseFeedback(e.target.value)}
+                placeholder={user?.role === 'peer' 
+                  ? "Brief summary of how the peer support session went..." 
+                  : "Brief summary of the counseling session outcome and recommendations..."
+                }
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCloseDialog(false)} disabled={closing}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleCloseSession} 
+              disabled={closing}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {closing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Closing...
+                </>
+              ) : (
+                'Yes, Close Session'
               )}
             </Button>
           </DialogFooter>

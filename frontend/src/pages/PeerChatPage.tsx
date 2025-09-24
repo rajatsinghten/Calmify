@@ -429,6 +429,15 @@ export default function PeerChatPage() {
                   <div className="flex gap-2">
                     <Button 
                       size="sm" 
+                      variant="destructive"
+                      onClick={openCloseDialog}
+                      disabled={loading}
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Close Session
+                    </Button>
+                    <Button 
+                      size="sm" 
                       variant="outline" 
                       onClick={openEscalateDialog}
                       className="text-orange-600 border-orange-300 hover:bg-orange-50"
@@ -436,14 +445,6 @@ export default function PeerChatPage() {
                     >
                       <AlertTriangle className="h-4 w-4 mr-2" />
                       Escalate to Counselor
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={openCloseDialog}
-                      disabled={loading}
-                    >
-                      End Session
                     </Button>
                   </div>
                 </div>
@@ -545,14 +546,17 @@ export default function PeerChatPage() {
       <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>End Peer Support Session</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-red-500" />
+              Close Session Permanently
+            </DialogTitle>
             <DialogDescription>
-              You're about to end this peer support session. Please provide a rating and any feedback about the conversation.
+              Are you sure you want to close this session permanently? This action cannot be undone. The patient will be notified that the session has ended.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="rating">How would you rate this session?</Label>
+              <Label htmlFor="rating">Session Rating (optional)</Label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -564,6 +568,7 @@ export default function PeerChatPage() {
                         ? 'text-yellow-400' 
                         : 'text-gray-300'
                     }`}
+                    title={`Rate ${star} star${star > 1 ? 's' : ''}`}
                   >
                     <Star className={`w-6 h-6 ${star <= closeRating ? 'fill-current' : ''}`} />
                   </button>
@@ -571,12 +576,12 @@ export default function PeerChatPage() {
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="feedback">Session notes or feedback (optional)</Label>
+              <Label htmlFor="feedback">Session Summary (optional)</Label>
               <Textarea
                 id="feedback"
                 value={closeFeedback}
                 onChange={(e) => setCloseFeedback(e.target.value)}
-                placeholder="Any notes about this peer support session..."
+                placeholder="Brief summary of how the peer support session went..."
                 rows={3}
               />
             </div>
@@ -585,8 +590,13 @@ export default function PeerChatPage() {
             <Button variant="outline" onClick={() => setShowCloseDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={endSession} disabled={loading}>
-              End Session
+            <Button 
+              variant="destructive" 
+              onClick={endSession} 
+              disabled={loading}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {loading ? 'Closing...' : 'Yes, Close Session'}
             </Button>
           </DialogFooter>
         </DialogContent>
