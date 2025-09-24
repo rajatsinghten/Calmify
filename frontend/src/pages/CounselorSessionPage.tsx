@@ -370,8 +370,7 @@ export default function CounselorSessionPage() {
                     onClick={openCloseDialog}
                     className="bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
                   >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Close Session
+                    End Session
                   </Button>
                 </div>
               </div>
@@ -452,17 +451,14 @@ export default function CounselorSessionPage() {
       <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-red-500" />
-              Close Session Permanently
-            </DialogTitle>
+            <DialogTitle>End Session</DialogTitle>
             <DialogDescription>
-              Are you sure you want to close this counseling session permanently? This action cannot be undone. The patient will be notified that the session has ended.
+              You're about to end this counseling session. Please provide a rating and session summary.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="rating">Session Rating (optional)</Label>
+              <Label htmlFor="rating">How would you rate this session?</Label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -474,7 +470,6 @@ export default function CounselorSessionPage() {
                         ? 'text-yellow-400' 
                         : 'text-gray-300'
                     }`}
-                    title={`Rate ${star} star${star > 1 ? 's' : ''}`}
                   >
                     <Star className={`w-6 h-6 ${star <= closeRating ? 'fill-current' : ''}`} />
                   </button>
@@ -482,12 +477,12 @@ export default function CounselorSessionPage() {
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="feedback">Session Summary (optional)</Label>
+              <Label htmlFor="feedback">Session summary</Label>
               <Textarea
                 id="feedback"
                 value={closeFeedback}
                 onChange={(e) => setCloseFeedback(e.target.value)}
-                placeholder="Brief summary of the counseling session outcome and recommendations..."
+                placeholder="Brief summary of the session outcome and next steps..."
                 rows={3}
               />
             </div>
@@ -496,13 +491,8 @@ export default function CounselorSessionPage() {
             <Button variant="outline" onClick={() => setShowCloseDialog(false)}>
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={endSession} 
-              disabled={loading}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {loading ? 'Closing...' : 'Yes, Close Session'}
+            <Button onClick={endSession} disabled={loading}>
+              {loading ? 'Ending...' : 'End Session'}
             </Button>
           </DialogFooter>
         </DialogContent>
