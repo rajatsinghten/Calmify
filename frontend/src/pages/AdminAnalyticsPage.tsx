@@ -40,7 +40,7 @@ interface CrisisMetrics {
 }
 
 export default function AdminAnalyticsPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [crisisMetrics, setCrisisMetrics] = useState<CrisisMetrics | null>(null);
@@ -49,13 +49,16 @@ export default function AdminAnalyticsPage() {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking authentication
+    if (isLoading) return;
+    
     if (!isAuthenticated || user?.role !== 'admin') {
       navigate('/login');
       return;
     }
     
     loadAnalytics();
-  }, [isAuthenticated, user, navigate, timeRange]);
+  }, [isAuthenticated, user, navigate, timeRange, isLoading]);
 
   const loadAnalytics = async () => {
     try {

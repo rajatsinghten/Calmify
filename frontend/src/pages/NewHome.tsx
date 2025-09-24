@@ -5,16 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function NewHome() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    // Redirect authenticated users to dashboard
-    if (isAuthenticated) {
-      navigate('/dashboard');
-      return;
-    }
-  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     const handleScroll = () => {

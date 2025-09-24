@@ -32,7 +32,7 @@ interface QuestionnaireData {
 export default function QuestionnairePage() {
   const { type } = useParams<{ type: string }>();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [questionnaire, setQuestionnaire] = useState<QuestionnaireData | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -44,6 +44,9 @@ export default function QuestionnairePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking authentication
+    if (isLoading) return;
+    
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -52,7 +55,7 @@ export default function QuestionnairePage() {
     if (type) {
       loadQuestionnaire();
     }
-  }, [type, isAuthenticated]);
+  }, [type, isAuthenticated, isLoading]);
 
   const loadQuestionnaire = async () => {
     try {

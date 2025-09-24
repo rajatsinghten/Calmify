@@ -134,7 +134,7 @@ const impactQuestion = {
 
 export default function AssessmentPage() {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   
   const [currentSection, setCurrentSection] = useState<'intro' | 'GAD-7' | 'PHQ-9' | 'GHQ-12' | 'impact' | 'results' | 'existing'>('intro');
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -153,6 +153,9 @@ export default function AssessmentPage() {
   const [assessmentStartTime, setAssessmentStartTime] = useState<Date>(new Date());
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking authentication
+    if (isLoading) return;
+    
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -166,7 +169,7 @@ export default function AssessmentPage() {
 
     // Check for existing assessment
     checkForExistingAssessment();
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, isLoading]);
 
   // Also check when the component mounts or when returning to the page
   useEffect(() => {
