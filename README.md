@@ -1,4 +1,4 @@
-# 🧠 Saneyar — AI-Powered Mental Health Support Platform
+# 🧠 Calmify — AI-Powered Mental Health Support Platform
 
 <div align="center">
 
