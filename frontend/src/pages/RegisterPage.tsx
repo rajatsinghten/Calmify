@@ -1,11 +1,11 @@
+/* Hallmark · theme: dusk (by request) · genre: modern-minimal · posture: committed */
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Eye, EyeOff, Info } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -22,11 +22,7 @@ export default function RegisterPage() {
       age: '',
       preferredName: '',
       phoneNumber: '',
-      emergencyContact: {
-        name: '',
-        relationship: '',
-        phone: ''
-      }
+      emergencyContact: { name: '', relationship: '', phone: '' }
     },
     agreedToTerms: false,
     agreedToPrivacy: false
@@ -34,37 +30,28 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
-  const [submitHovered, setSubmitHovered] = useState(false);
 
-  // Redirect if user is already authenticated
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      navigate('/');
-    }
+    if (isAuthenticated && !isLoading) navigate('/');
   }, [isAuthenticated, isLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters long');
       return;
     }
-
     if (!formData.agreedToTerms || !formData.agreedToPrivacy) {
       setError('Please agree to the Terms of Service and Privacy Policy');
       return;
     }
-
     try {
-      const userData = {
+      await register({
         username: formData.username,
         email: formData.email,
         password: formData.password,
@@ -75,17 +62,11 @@ export default function RegisterPage() {
           age: formData.profile.age ? parseInt(formData.profile.age) : undefined,
           preferredName: formData.profile.preferredName || undefined,
           phoneNumber: formData.profile.phoneNumber || undefined,
-          emergencyContact: formData.profile.emergencyContact.name ? {
-            name: formData.profile.emergencyContact.name,
-            relationship: formData.profile.emergencyContact.relationship,
-            phone: formData.profile.emergencyContact.phone
-          } : undefined
+          emergencyContact: formData.profile.emergencyContact.name ? formData.profile.emergencyContact : undefined
         },
         agreedToTerms: formData.agreedToTerms,
         agreedToPrivacy: formData.agreedToPrivacy
-      };
-
-      await register(userData);
+      });
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
@@ -94,24 +75,19 @@ export default function RegisterPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    
     if (name.includes('.')) {
       const [parent, child, grandchild] = name.split('.');
       setFormData(prev => ({
         ...prev,
         [parent]: {
           ...prev[parent as keyof typeof prev] as any,
-          [child]: grandchild ? {
-            ...(prev[parent as keyof typeof prev] as any)[child],
-            [grandchild]: type === 'checkbox' ? checked : value
-          } : (type === 'checkbox' ? checked : value)
+          [child]: grandchild
+            ? { ...(prev[parent as keyof typeof prev] as any)[child], [grandchild]: type === 'checkbox' ? checked : value }
+            : (type === 'checkbox' ? checked : value)
         }
       }));
     } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      }));
+      setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     }
   };
 
@@ -119,369 +95,281 @@ export default function RegisterPage() {
     setFormData(prev => ({ ...prev, role: value }));
   };
 
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF8F5' }}>
-        <div className="flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#A398C9' }} />
-          <span className="ml-2" style={{ color: '#6B6B6B' }}>Loading...</span>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-paper)]">
+        <div className="flex items-center gap-2.5 text-xs text-[var(--color-muted)]">
+          <Loader2 className="h-4 w-4 animate-spin text-[var(--color-accent)]" />
+          <span>Setting up your confidential space…</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF8F5' }}>
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/calmifylogo.png" alt="Calmify Logo" className="h-12 w-auto object-contain" />
-            <h1 className="text-3xl font-heading font-bold" style={{ color: '#3A3A3A' }}>Calmify</h1>
-          </div>
-          <p style={{ color: '#6B6B6B' }}>
-            Join our supportive community for mental health
-          </p>
-        </div>
+    <div className="min-h-screen bg-[var(--color-paper)] relative flex flex-col justify-between p-6 text-[var(--color-ink)] overflow-hidden">
+      {/* Background wallpaper with dusk scrim */}
+      <div className="absolute inset-0 pointer-events-none select-none opacity-20" aria-hidden="true">
+        <img src="/dusk-bg.jpg" alt="" className="w-full h-full object-cover object-center" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-paper)]/70 via-[var(--color-paper)]/90 to-[var(--color-paper)]" />
+      </div>
 
-        <div className="rounded-3xl shadow-lg p-8" style={{ backgroundColor: 'rgba(255,255,255,0.75)', border: '1px solid rgba(143,174,155,0.12)', backdropFilter: 'blur(10px)' }}>
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-heading font-bold mb-2" style={{ color: '#3A3A3A' }}>Create Your Account</h2>
-            <p style={{ color: '#6B6B6B' }}>
-              Start your journey to better mental health with us
+      {/* Brand Bar */}
+      <div className="max-w-6xl w-full mx-auto flex items-center justify-between py-2 relative z-10">
+        <Link to="/" className="flex items-center gap-2 group">
+          <img src="/meditation-white.png" alt="Calmify" className="h-6 w-6 object-contain" />
+          <span className="font-display text-lg text-[var(--color-ink)] font-medium">Calmify</span>
+        </Link>
+        <Link to="/login" className="text-xs text-[var(--color-muted)] hover:text-[var(--color-ink)] transition-colors">
+          Already have an account? Sign in →
+        </Link>
+      </div>
+
+      {/* Main Glass Form Card */}
+      <div className="w-full max-w-xl mx-auto my-auto py-10 relative z-10">
+        <div className="glass p-8 sm:p-10">
+
+          {/* Heading */}
+          <div className="mb-8">
+            <span className="text-xs text-[var(--color-accent)] font-medium block mb-1">Create account</span>
+            <h1 className="text-3xl font-display text-[var(--color-ink)] font-medium leading-tight mb-2">
+              Join Calmify.
+            </h1>
+            <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+              Takes less than two minutes. Your information is strictly protected and never shared.
             </p>
           </div>
-          
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-6">
-              {error && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                  <p className="text-red-600 text-sm">{error}</p>
-                </div>
-              )}
 
-              {/* Basic Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-heading font-semibold" style={{ color: '#3A3A3A' }}>Basic Information</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="username" className="font-medium" style={{ color: '#4A4750' }}>Username *</Label>
-                    <Input
-                      id="username"
-                      name="username"
-                      placeholder="Choose a username"
-                      value={formData.username}
-                      onChange={handleInputChange}
-                      required
-                      disabled={isLoading}
-                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
-                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
-                    />
-                  </div>
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-3 rounded-[var(--radius-inner)] bg-[oklch(22%_0.05_25)] border border-[oklch(38%_0.08_25)] text-xs text-[oklch(84%_0.10_25)]">
+              {error}
+            </div>
+          )}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="font-medium" style={{ color: '#4A4750' }}>Email *</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="your.email@example.com"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      disabled={isLoading}
-                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
-                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
-                    />
-                  </div>
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="font-medium" style={{ color: '#4A4750' }}>Password *</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Create a strong password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        required
-                        disabled={isLoading}
-                        className="focus:border-[#A398C9] focus:ring-[#A398C9] pr-10"
-                        style={{ borderColor: 'rgba(143,174,155,0.15)' }}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={isLoading}
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="font-medium" style={{ color: '#4A4750' }}>Confirm Password *</Label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm your password"
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        required
-                        disabled={isLoading}
-                        className="focus:border-[#A398C9] focus:ring-[#A398C9] pr-10"
-                        style={{ borderColor: 'rgba(143,174,155,0.15)' }}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        disabled={isLoading}
-                      >
-                        {showConfirmPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="role" className="font-medium" style={{ color: '#4A4750' }}>Role *</Label>
-                  <Select 
-                    value={formData.role} 
-                    onValueChange={handleRoleChange} 
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className="focus:border-[#A398C9] focus:ring-[#A398C9]" style={{ borderColor: 'rgba(143,174,155,0.15)' }}>
-                      <SelectValue placeholder="Select your role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="patient">
-                        <div className="flex flex-col">
-                          <span>Patient/Student</span>
-                          <span className="text-xs" style={{ color: '#8A8A8A' }}>Seeking mental health support</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="peer">
-                        <div className="flex flex-col">
-                          <span>Peer Volunteer</span>
-                          <span className="text-xs" style={{ color: '#8A8A8A' }}>Trained to provide peer support</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Profile Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-heading font-semibold" style={{ color: '#3A3A3A' }}>Profile Information</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="profile.firstName" className="font-medium" style={{ color: '#4A4750' }}>First Name</Label>
-                    <Input
-                      id="profile.firstName"
-                      name="profile.firstName"
-                      placeholder="Your first name"
-                      value={formData.profile.firstName}
-                      onChange={handleInputChange}
-                      disabled={isLoading}
-                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
-                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="profile.lastName" className="font-medium" style={{ color: '#4A4750' }}>Last Name</Label>
-                    <Input
-                      id="profile.lastName"
-                      name="profile.lastName"
-                      placeholder="Your last name"
-                      value={formData.profile.lastName}
-                      onChange={handleInputChange}
-                      disabled={isLoading}
-                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
-                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="profile.preferredName" className="font-medium" style={{ color: '#4A4750' }}>Preferred Name</Label>
-                    <Input
-                      id="profile.preferredName"
-                      name="profile.preferredName"
-                      placeholder="What should we call you?"
-                      value={formData.profile.preferredName}
-                      onChange={handleInputChange}
-                      disabled={isLoading}
-                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
-                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="profile.age" className="font-medium" style={{ color: '#4A4750' }}>Age</Label>
-                    <Input
-                      id="profile.age"
-                      name="profile.age"
-                      type="number"
-                      min="13"
-                      max="120"
-                      placeholder="Your age"
-                      value={formData.profile.age}
-                      onChange={handleInputChange}
-                      disabled={isLoading}
-                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
-                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Emergency Contact */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-heading font-semibold" style={{ color: '#3A3A3A' }}>Emergency Contact</h3>
-                  <Info className="h-4 w-4 text-gray-500" />
-                </div>
-                <p className="text-sm" style={{ color: '#8A8A8A' }}>
-                  Optional but recommended for crisis situations
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="profile.emergencyContact.name" className="font-medium" style={{ color: '#4A4750' }}>Contact Name</Label>
-                    <Input
-                      id="profile.emergencyContact.name"
-                      name="profile.emergencyContact.name"
-                      placeholder="Emergency contact name"
-                      value={formData.profile.emergencyContact.name}
-                      onChange={handleInputChange}
-                      disabled={isLoading}
-                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
-                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="profile.emergencyContact.relationship" className="font-medium" style={{ color: '#4A4750' }}>Relationship</Label>
-                    <Input
-                      id="profile.emergencyContact.relationship"
-                      name="profile.emergencyContact.relationship"
-                      placeholder="e.g., Parent, Sibling, Friend"
-                      value={formData.profile.emergencyContact.relationship}
-                      onChange={handleInputChange}
-                      disabled={isLoading}
-                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
-                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="profile.emergencyContact.phone" className="font-medium" style={{ color: '#4A4750' }}>Contact Phone</Label>
+            {/* Account Credentials */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="username" className="text-xs font-medium text-[var(--color-ink-2)]">
+                    Username *
+                  </Label>
                   <Input
-                    id="profile.emergencyContact.phone"
-                    name="profile.emergencyContact.phone"
-                    type="tel"
-                    placeholder="Emergency contact phone number"
-                    value={formData.profile.emergencyContact.phone}
+                    id="username"
+                    name="username"
+                    placeholder="e.g. calm_river"
+                    value={formData.username}
                     onChange={handleInputChange}
+                    required
                     disabled={isLoading}
-                    className="focus:border-[#A398C9] focus:ring-[#A398C9]"
-                    style={{ borderColor: 'rgba(143,174,155,0.15)' }}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-xs font-medium text-[var(--color-ink-2)]">
+                    Email address *
+                  </Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
 
-              {/* Terms and Privacy */}
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      id="agreedToTerms"
-                      name="agreedToTerms"
-                      type="checkbox"
-                      checked={formData.agreedToTerms}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="text-xs font-medium text-[var(--color-ink-2)]">
+                    Password *
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="At least 8 characters"
+                      value={formData.password}
                       onChange={handleInputChange}
-                      className="rounded border-gray-300 text-[#A398C9] focus:ring-[#A398C9]"
-                      disabled={isLoading}
                       required
+                      disabled={isLoading}
+                      className="pr-10"
                     />
-                    <Label htmlFor="agreedToTerms" className="text-sm" style={{ color: '#6B6B6B' }}>
-                      I agree to the{' '}
-                      <Link to="/terms" className="text-[#A398C9] hover:text-[#8B7FB8] hover:underline">
-                        Terms of Service
-                      </Link>
-                    </Label>
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={isLoading}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
+                </div>
 
-                  <div className="flex items-center space-x-2">
-                    <input
-                      id="agreedToPrivacy"
-                      name="agreedToPrivacy"
-                      type="checkbox"
-                      checked={formData.agreedToPrivacy}
+                <div className="space-y-1.5">
+                  <Label htmlFor="confirmPassword" className="text-xs font-medium text-[var(--color-ink-2)]">
+                    Confirm Password *
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm password"
+                      value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className="rounded border-gray-300 text-[#A398C9] focus:ring-[#A398C9]"
-                      disabled={isLoading}
                       required
+                      disabled={isLoading}
+                      className="pr-10"
                     />
-                    <Label htmlFor="agreedToPrivacy" className="text-sm" style={{ color: '#6B6B6B' }}>
-                      I agree to the{' '}
-                      <Link to="/privacy" className="text-[#A398C9] hover:text-[#8B7FB8] hover:underline">
-                        Privacy Policy
-                      </Link>
-                    </Label>
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      disabled={isLoading}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="role" className="text-xs font-medium text-[var(--color-ink-2)]">
+                  I am joining Calmify as a *
+                </Label>
+                <Select value={formData.role} onValueChange={handleRoleChange} disabled={isLoading}>
+                  <SelectTrigger className="h-11 rounded-[var(--radius-inner)] border-[var(--color-rule)] bg-[var(--color-paper-2)] text-[var(--color-ink)]">
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[var(--color-paper-2)] border-[var(--color-rule)] text-[var(--color-ink)] rounded-[var(--radius-inner)] shadow-lg">
+                    <SelectItem value="patient" className="focus:bg-[var(--color-paper-3)]">
+                      <div className="flex flex-col text-left py-1">
+                        <span className="font-medium text-xs text-[var(--color-ink)]">Patient / Community member</span>
+                        <span className="text-[11px] text-[var(--color-muted)]">Looking for support, self-care, or therapy</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="peer" className="focus:bg-[var(--color-paper-3)]">
+                      <div className="flex flex-col text-left py-1">
+                        <span className="font-medium text-xs text-[var(--color-ink)]">Peer volunteer</span>
+                        <span className="text-[11px] text-[var(--color-muted)]">Trained to listen and help others</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Optional Personal Information */}
+            <div className="pt-4 border-t border-[var(--color-rule)] space-y-4">
+              <span className="text-xs text-[var(--color-muted)] block">
+                Optional profile details
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="profile.preferredName" className="text-xs font-medium text-[var(--color-ink-2)]">
+                    Preferred name / alias
+                  </Label>
+                  <Input
+                    id="profile.preferredName"
+                    name="profile.preferredName"
+                    placeholder="How we should address you"
+                    value={formData.profile.preferredName}
+                    onChange={handleInputChange}
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="profile.age" className="text-xs font-medium text-[var(--color-ink-2)]">
+                    Age
+                  </Label>
+                  <Input
+                    id="profile.age"
+                    name="profile.age"
+                    type="number"
+                    min="13"
+                    max="120"
+                    placeholder="Your age"
+                    value={formData.profile.age}
+                    onChange={handleInputChange}
+                    disabled={isLoading}
+                  />
                 </div>
               </div>
             </div>
 
-            <div className="space-y-4 mt-8">
-              <button 
-                type="submit" 
-                className="w-full px-8 py-4 text-white text-lg font-semibold rounded-full transition-all duration-300 ease-out hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: submitHovered ? '#8B7FB8' : '#A398C9' }}
-                onMouseEnter={() => setSubmitHovered(true)}
-                onMouseLeave={() => setSubmitHovered(false)}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Creating account...
-                  </div>
-                ) : (
-                  'Create Account'
-                )}
-              </button>
+            {/* Consents */}
+            <div className="pt-3 space-y-2.5 text-xs text-[var(--color-muted)]">
+              <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  name="agreedToTerms"
+                  checked={formData.agreedToTerms}
+                  onChange={handleInputChange}
+                  required
+                  disabled={isLoading}
+                  className="mt-0.5 w-3.5 h-3.5 rounded-[4px] border-[var(--color-rule)] bg-[var(--color-paper-2)] accent-[var(--color-accent)]"
+                />
+                <span>
+                  I agree to the <Link to="/terms" className="text-[var(--color-accent)] underline">Terms of Service</Link>
+                </span>
+              </label>
 
-              <div className="text-center text-sm" style={{ color: '#6B6B6B' }}>
-                Already have an account?{' '}
-                <Link 
-                  to="/login" 
-                  className="text-[#A398C9] hover:text-[#8B7FB8] hover:underline font-medium"
-                >
-                  Sign in
-                </Link>
-              </div>
+              <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  name="agreedToPrivacy"
+                  checked={formData.agreedToPrivacy}
+                  onChange={handleInputChange}
+                  required
+                  disabled={isLoading}
+                  className="mt-0.5 w-3.5 h-3.5 rounded-[4px] border-[var(--color-rule)] bg-[var(--color-paper-2)] accent-[var(--color-accent)]"
+                />
+                <span>
+                  I agree to the <Link to="/privacy" className="text-[var(--color-accent)] underline">Privacy Policy</Link>
+                </span>
+              </label>
             </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full inline-flex items-center justify-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-ink)] h-11 rounded-[var(--radius-pill)] text-xs font-semibold hover:bg-[var(--color-accent-hi)] transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Creating your space…</span>
+                </>
+              ) : (
+                <>
+                  <span>Create account</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              )}
+            </button>
           </form>
+
+          <p className="text-center text-xs text-[var(--color-muted)] mt-6">
+            Prefer not to sign up?{' '}
+            <Link to="/login" className="text-[var(--color-accent)] font-medium hover:underline">
+              Enter anonymously instead
+            </Link>
+          </p>
         </div>
+      </div>
+
+      <div className="max-w-6xl w-full mx-auto text-center py-2 text-xs text-[var(--color-muted)]">
+        <span>Calmify · Zero data selling · 24/7 crisis protocol ready</span>
       </div>
     </div>
   );

@@ -1,92 +1,148 @@
+/* Hallmark · theme: dusk (by request) · genre: modern-minimal · posture: committed */
+/* Critique: Quiet expensive dusk slate atmosphere, Wix Madefor typography, smoked glass with lit edge, periwinkle & apricot signals */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Calmify Mental Health Platform — Calm & Trustworthy Design System */
-
 @layer base {
   :root {
-    /* Warm off-white background (#FAF8F5) — H:36 S:33% L:97% */
-    --background: 36 33% 97%;
-    /* Warm dark gray text (#4A4750) — H:260 S:6% L:30% */
-    --foreground: 260 6% 30%;
+    /* Dusk Theme Core Tokens */
+    --color-paper: oklch(17.5% 0.014 268);
+    --color-paper-2: oklch(21% 0.016 268);
+    --color-paper-3: oklch(25% 0.017 268);
+    --color-ink: oklch(96% 0.006 75);
+    --color-ink-2: oklch(85% 0.010 262);
+    --color-muted: oklch(70% 0.016 262);
+    --color-rule: oklch(30% 0.016 266);
+    --color-light: oklch(100% 0 0);
+    --color-shade: oklch(10% 0.022 268);
+    --color-accent: oklch(77% 0.10 274);
+    --color-accent-ink: oklch(19% 0.035 274);
+    --color-accent-hi: oklch(84% 0.085 274);
+    --color-accent-deep: oklch(44% 0.13 274);
+    --color-accent-soft: oklch(91% 0.038 274);
+    --color-focus: oklch(80% 0.10 274);
+    --color-accent-2: oklch(83% 0.095 62);
+    --color-dusk: oklch(70% 0.12 330);
+    --color-day-ink: oklch(22% 0.022 268);
+    --color-day-muted: oklch(38% 0.022 266);
+    --color-fog: oklch(94% 0.012 70);
+    --color-well: oklch(95.5% 0.008 75);
+    --color-well-2: oklch(92% 0.010 75);
+    --color-well-ink: oklch(21% 0.016 268);
+    --color-well-muted: oklch(47% 0.016 265);
+    --color-well-rule: oklch(87.5% 0.009 75);
+    --color-card: oklch(99.5% 0.003 75);
+    --glass: oklch(22% 0.018 268 / 0.58);
+    --glass-blur: 22px;
+    --glass-hi: inset 0 1px 0 oklch(100% 0 0 / 0.10), inset 0 0 0 1px oklch(100% 0 0 / 0.06);
+    --shadow-card: 0 1px 0 oklch(100% 0 0 / 0.06) inset, 0 40px 80px -32px oklch(8% 0.02 268 / 0.7);
+    --font-display: "Wix Madefor Display", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Wix Madefor Text", ui-sans-serif, system-ui, sans-serif;
+    --radius-card: 18px;
+    --radius-inner: 10px;
+    --radius-pill: 999px;
+    --rule-hair: 1px;
+    --tracking-display: -0.022em;
+    --display-weight: 500;
 
-    /* Card — slightly lighter off-white on cream */
-    --card: 36 33% 99%;
-    --card-foreground: 260 6% 30%;
-
-    /* Popover */
-    --popover: 36 33% 99%;
-    --popover-foreground: 260 6% 30%;
-
-    /* Primary — warm lavender/muted purple (#A398C9) — H:253 S:31% L:69% */
-    --primary: 253 31% 69%;
-    --primary-foreground: 0 0% 100%;
-
-    /* Secondary — dusty/muted blue (#7A9BB0) — H:204 S:24% L:58% */
-    --secondary: 204 24% 58%;
-    --secondary-foreground: 0 0% 100%;
-
-    /* Muted backgrounds */
-    --muted: 36 15% 92%;
-    --muted-foreground: 260 6% 45%;
-
-    /* Accent — muted gold/mustard (#C9B398) — H:33 S:31% L:69% */
-    --accent: 33 31% 69%;
-    --accent-foreground: 260 6% 20%;
-
-    /* Emergency red — kept for crisis buttons */
-    --destructive: 0 84% 60%;
+    /* Framework compatible bindings */
+    --background: 268 8% 18%;
+    --foreground: 75 4% 96%;
+    --card: 268 9% 21%;
+    --card-foreground: 75 4% 96%;
+    --popover: 268 9% 21%;
+    --popover-foreground: 75 4% 96%;
+    --primary: 274 45% 77%;
+    --primary-foreground: 274 35% 19%;
+    --secondary: 268 8% 25%;
+    --secondary-foreground: 75 4% 96%;
+    --muted: 268 8% 25%;
+    --muted-foreground: 262 7% 70%;
+    --accent: 62 45% 83%;
+    --accent-foreground: 268 9% 18%;
+    --destructive: 6 57% 55%;
     --destructive-foreground: 0 0% 100%;
-
-    /* Borders — warm tone */
-    --border: 36 18% 88%;
-    --input: 36 18% 88%;
-    --ring: 253 31% 69%;
-
-    /* Rounded corners — larger for calm feel */
-    --radius: 0.75rem;
-
-    /* Sidebar — warm neutral */
-    --sidebar-background: 36 20% 94%;
-    --sidebar-foreground: 260 6% 25%;
-    --sidebar-primary: 253 31% 69%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 36 18% 88%;
-    --sidebar-accent-foreground: 260 6% 20%;
-    --sidebar-border: 36 15% 85%;
-    --sidebar-ring: 253 31% 69%;
+    --border: 266 8% 30%;
+    --input: 266 8% 30%;
+    --ring: 274 45% 77%;
+    --radius: 10px;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    line-height: 1.7;
+  /* Hallmark Floor 4: overflow-x: clip */
+  html, body {
+    overflow-x: clip;
+    background-color: var(--color-paper);
+    background-image: 
+      radial-gradient(ellipse 90% 60% at 50% -5%, oklch(26% 0.035 274 / 0.35), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 85% 20%, oklch(22% 0.025 62 / 0.18), transparent 60%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Hallmark Floor 6: instant focus-visible */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  /* Display heads */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
-    line-height: 1.3;
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--tracking-display);
+    line-height: 1.1;
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+
+  /* Hallmark Floor 7: prefers-reduced-motion fallback */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-/* Sidebar text utilities */
-.text-sidebar {
-  color: hsl(var(--sidebar-foreground));
+/* Dusk Theme Utility Classes */
+.glass {
+  background: var(--glass);
+  border-radius: var(--radius-card);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+  box-shadow: var(--glass-hi), var(--shadow-card);
+  border: 1px solid var(--color-rule);
 }
 
-.text-sidebar-muted {
-  color: hsl(var(--muted-foreground));
+.bone-well {
+  background: var(--color-well);
+  color: var(--color-well-ink);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-well-rule);
 }
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.num .c {
+  color: var(--color-muted);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-paper); }
+::-webkit-scrollbar-thumb { background: var(--color-rule); border-radius: var(--radius-pill); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }

@@ -14,9 +14,9 @@ export function Layout({ children, currentRole }: LayoutProps) {
   const actualRole = user?.role || currentRole || "patient";
 
   return (
-    <div className="min-h-screen flex flex-col w-full">
+    <div className="min-h-screen flex flex-col w-full bg-[var(--color-paper)] text-[var(--color-ink)]">
       <AppNavbar currentRole={actualRole} />
-      <main className="flex-1 min-h-0 overflow-hidden">
+      <main className="flex-1 min-h-0">
         {children}
       </main>
     </div>

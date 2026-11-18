@@ -1,11 +1,9 @@
+/* Hallmark · theme: dusk (by request) · genre: modern-minimal · posture: committed */
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, Users, MessageCircle, Brain, Heart, ArrowRight, Clock, Lock, Phone } from 'lucide-react';
+import { Shield, Users, MessageCircle, Brain, Heart, ArrowRight, Lock, Phone, CheckCircle2, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-/* ──────────────────────────────────────────────────────────────
-   Intersection-observer hook for gentle scroll-triggered fades
-   ────────────────────────────────────────────────────────────── */
 function useFadeInOnScroll() {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -15,7 +13,7 @@ function useFadeInOnScroll() {
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
-      { threshold: 0.15 }
+      { threshold: 0.12 }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -24,214 +22,299 @@ function useFadeInOnScroll() {
   return { ref, isVisible };
 }
 
-/* ──────────────────────────────────────────────────────────────
-   Design tokens used inline (Tailwind arbitrary values)
-   ────────────────────────────────────────────────────────────── */
-const sage   = '#A398C9';
-const sageHover = '#8B7FB8';
-const dusty  = '#7A9BB0';
-const cream  = '#FAF8F5';
-const warmGray = '#4A4750';
-const coral   = '#C9B398';
-const coralHover = '#BAA182';
-
 export default function NewHome() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeTab, setActiveTab] = useState<'ai' | 'peer' | 'counselor'>('ai');
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 30);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Scroll-triggered sections
   const features_fade = useFadeInOnScroll();
   const howItWorks_fade = useFadeInOnScroll();
   const trust_fade = useFadeInOnScroll();
 
-  const features = [
+  const previewContent = {
+    ai: {
+      tag: "Immediate AI companion",
+      title: "Active listening and grounding whenever you need an ear",
+      message: "It sounds like you've been carrying a heavy weight lately. Would you like to try a 2-minute 4-7-8 breathing exercise together, or simply talk through what happened today?",
+      options: ["Start 2-min breathing exercise", "I just want to vent", "Connect me to a real person"],
+      meta: "Always on · Completely confidential · Crisis-trained"
+    },
+    peer: {
+      tag: "Trained peer volunteers",
+      title: "Shared lived experience with someone who understands",
+      message: "Hey there. I'm Alex — I went through severe academic anxiety during my college years. You're completely safe here, and you can share as much or as little as you feel comfortable with.",
+      options: ["Request a peer match", "View volunteer profiles", "Learn how peers are vetted"],
+      meta: "Anonymous chat · Trained listeners · Community support"
+    },
+    counselor: {
+      tag: "Licensed therapists",
+      title: "Professional mental healthcare for structured guidance",
+      message: "Welcome to confidential counseling. We work together on evidence-based strategies (CBT, DBT, mindfulness) tailored to your personal goals and mental wellness plan.",
+      options: ["Book initial intake session", "Browse licensed specialists", "Emergency support"],
+      meta: "Verified credentials · Encrypted clinical notes · Crisis escalation"
+    }
+  };
+
+  const capabilities = [
     {
+      step: "01",
       icon: Brain,
-      title: "AI Mental Health Support",
-      description: "24/7 AI chatbot that provides immediate crisis detection, personalized coping strategies, and guided support"
+      title: "Empathetic AI companion",
+      description: "Available 24 hours a day for crisis de-escalation, guided mindfulness, and active listening without judgment or appointment delays."
     },
     {
+      step: "02",
       icon: Users,
-      title: "Peer Support Community",
-      description: "Connect with trained peer volunteers who understand your experiences and provide empathetic support"
+      title: "Peer volunteer network",
+      description: "Connect 1-on-1 with trained community volunteers who understand the reality of burnout, isolation, and academic or career pressure."
     },
     {
+      step: "03",
       icon: MessageCircle,
-      title: "Professional Counseling",
-      description: "Access licensed mental health professionals for comprehensive therapy and crisis intervention"
+      title: "Licensed counseling",
+      description: "Access certified therapists and clinical counselors for comprehensive psychotherapy, personalized wellness plans, and crisis intervention."
     },
     {
+      step: "04",
       icon: Shield,
-      title: "Complete Privacy Protection",
-      description: "Anonymous sessions with end-to-end encryption ensuring your identity and conversations remain confidential"
+      title: "Complete privacy protection",
+      description: "Anonymous sessions with zero identity verification required. End-to-end encrypted chats and automated session wiping upon exit."
     }
   ];
 
-  const stats = [
-    { number: "24/7", label: "AI Support" },
-    { number: "100%", label: "Anonymous" },
-    { number: "Real-time", label: "Crisis Detection" },
-    { number: "Secure", label: "Encrypted Chats" }
-  ];
-
   return (
-    <div className="min-h-screen" style={{ backgroundColor: cream, color: warmGray }}>
+    <div className="min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)] selection:bg-[var(--color-accent)] selection:text-[var(--color-accent-ink)]">
 
-      {/* ───────── Navigation ───────── */}
+      {/* ── Top Navigation ── */}
       <nav
-        className={`fixed w-full z-50 transition-all duration-500 ease-out ${
+        className={`fixed w-full z-50 transition-colors duration-200 ${
           isScrolled
-            ? 'shadow-md backdrop-blur-xl'
-            : 'backdrop-blur-md'
+            ? 'bg-[var(--glass)] backdrop-blur-[22px] border-b border-[var(--color-rule)] shadow-[var(--shadow-card)]'
+            : 'bg-transparent border-b border-transparent'
         }`}
-        style={{
-          backgroundColor: isScrolled ? 'rgba(250,247,242,0.92)' : 'rgba(250,247,242,0.8)',
-          borderBottom: isScrolled ? '1px solid rgba(143,174,155,0.15)' : '1px solid transparent',
-        }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-3">
-              <img src="/calmifylogo.png" alt="Calmify Logo" className="h-8 w-auto object-contain" />
-              <span className="text-xl font-heading font-bold" style={{ color: '#3A3A3A' }}>
-                Calmify
-              </span>
-            </div>
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
+            <img src="/meditation-white.png" alt="Calmify" className="h-6 w-6 object-contain" />
+            <span className="font-display text-lg tracking-tight text-[var(--color-ink)] font-medium">
+              Calmify
+            </span>
+          </div>
 
-            {/* Nav links */}
-            <div className="hidden md:flex items-center space-x-8">
-              {['Features', 'How it Works', 'Support'].map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="text-sm font-medium transition-colors duration-300 hover:opacity-100"
-                  style={{ color: warmGray, opacity: 0.7 }}
-                >
-                  {item}
-                </a>
-              ))}
-            </div>
+          <div className="hidden md:flex items-center gap-8 text-sm text-[var(--color-muted)]">
+            <a href="#capabilities" className="hover:text-[var(--color-ink)] transition-colors">Capabilities</a>
+            <a href="#how-it-works" className="hover:text-[var(--color-ink)] transition-colors">How it works</a>
+            <a href="#privacy" className="hover:text-[var(--color-ink)] transition-colors">Privacy & safety</a>
+          </div>
 
-            {/* Auth buttons */}
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => navigate('/login')}
-                className="px-5 py-2 text-sm font-medium transition-colors duration-300 rounded-full"
-                style={{ color: warmGray }}
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => navigate('/register')}
-                className="px-6 py-2.5 text-sm font-semibold text-white rounded-full transition-all duration-300 hover:shadow-lg active:scale-[0.97]"
-                style={{ backgroundColor: sage }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = sageHover}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = sage}
-              >
-                Get Started
-              </button>
-            </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/login')}
+              className="text-xs text-[var(--color-muted)] hover:text-[var(--color-ink)] px-3 py-2 transition-colors font-medium"
+            >
+              Sign in
+            </button>
+            <button
+              onClick={() => navigate('/register')}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[var(--color-accent)] text-[var(--color-accent-ink)] px-4 py-2 rounded-[var(--radius-pill)] hover:bg-[var(--color-accent-hi)] transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+            >
+              <span>Get started</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* ───────── Hero Section ───────── */}
-      <section className="min-h-screen px-6 relative overflow-hidden flex flex-col justify-center">
-        {/* Soft organic background blobs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <div
-            className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full opacity-[0.12] animate-gentle-float"
-            style={{ backgroundColor: sage }}
+      {/* ── Hero Section ── */}
+      <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 px-6 overflow-hidden">
+        {/* Dusk Landscape Wallpaper Background */}
+        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" aria-hidden="true">
+          <img
+            src="/dusk-bg.jpg"
+            alt="Dusk landscape"
+            className="w-full h-full object-cover object-center opacity-40 scale-100"
           />
-          <div
-            className="absolute -bottom-24 -left-24 w-[400px] h-[400px] rounded-full opacity-[0.08]"
-            style={{ backgroundColor: dusty, animationDelay: '3s' }}
-          />
-          <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.06]"
-            style={{ backgroundColor: coral }}
-          />
+          {/* Natural Dusk Scrim: Fades gently into slate paper */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-paper)]/30 via-[var(--color-paper)]/75 to-[var(--color-paper)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_60%_at_50%_35%,transparent_20%,var(--color-paper)_90%)]" />
         </div>
 
-        <div className="max-w-7xl mx-auto text-center relative z-10 w-full pt-28 pb-12 flex-1 flex flex-col justify-center">
-          <div className="max-w-4xl mx-auto">
-            {/* Headline */}
-            <h1
-              className="text-5xl md:text-7xl font-heading font-extrabold mb-8 leading-[1.1] animate-fade-in-up"
-              style={{ color: '#3A3A3A', animationDelay: '0.15s' }}
-            >
-              Your Mental Health,
-              <span style={{ color: sage }}> Supported</span>
-            </h1>
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          {/* Headline */}
+          <h1 className="text-4xl sm:text-6xl md:text-[4rem] font-display font-medium tracking-[-0.025em] text-[var(--color-ink)] leading-[1.08] mb-6">
+            Your mental health, supported at the calm end of the day.
+          </h1>
 
-            {/* Subheadline */}
-            <p
-              className="text-lg md:text-xl mb-14 leading-relaxed max-w-3xl mx-auto animate-fade-in-up"
-              style={{ color: '#6B6B6B', animationDelay: '0.3s', lineHeight: '1.8' }}
-            >
-              Anonymous, professional, and accessible mental health support available 24/7.
-              Connect with AI, peers, and licensed counselors in a safe, confidential environment.
-            </p>
+          {/* Subtitle */}
+          <p className="text-base sm:text-lg text-[var(--color-ink-2)] max-w-2xl mx-auto leading-relaxed mb-10 font-normal">
+            A quiet space combining immediate crisis-trained AI companionship, vetted peer listeners, and licensed therapists whenever life feels heavy.
+          </p>
 
-            {/* CTA Buttons */}
-            <div
-              className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-5 animate-fade-in-up"
-              style={{ animationDelay: '0.45s' }}
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-12">
+            <button
+              onClick={() => navigate('/register')}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-ink)] px-7 py-3 rounded-[var(--radius-pill)] font-semibold text-sm hover:bg-[var(--color-accent-hi)] transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
             >
-              <button
-                onClick={() => navigate('/register')}
-                className="px-8 py-4 text-white text-base font-semibold rounded-full transition-all duration-300 hover:shadow-xl active:scale-[0.97] flex items-center space-x-2"
-                style={{ backgroundColor: sage }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = sageHover; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = sage; e.currentTarget.style.transform = 'translateY(0)'; }}
-              >
-                <span>Start Your Journey</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => navigate('/crisis')}
-                className="px-8 py-4 text-base font-semibold rounded-full transition-all duration-300 flex items-center space-x-2"
-                style={{
-                  backgroundColor: 'rgba(220,78,65,0.06)',
-                  border: '2px solid rgba(220,78,65,0.2)',
-                  color: '#C0554A',
-                }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(220,78,65,0.1)'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(220,78,65,0.06)'}
-              >
-                <Phone className="w-5 h-5" />
-                <span>Crisis Support</span>
-              </button>
+              <span>Start free and anonymous</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => navigate('/crisis')}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[oklch(22%_0.05_25)] text-[oklch(84%_0.10_25)] border border-[oklch(38%_0.08_25)] px-6 py-3 rounded-[var(--radius-pill)] font-medium text-sm hover:bg-[oklch(26%_0.06_25)] transition-colors"
+            >
+              <Phone className="w-4 h-4" />
+              <span>Crisis helpline (988)</span>
+            </button>
+          </div>
+
+          {/* Signals */}
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-[var(--color-muted)]">
+            <span>Anonymous sessions</span>
+            <span className="text-[var(--color-rule)]">/</span>
+            <span>Zero waitlist</span>
+            <span className="text-[var(--color-rule)]">/</span>
+            <span>End-to-end encrypted</span>
+          </div>
+        </div>
+
+        {/* ── Hero Smoked Glass Interactive Preview ── */}
+        <div className="max-w-3xl mx-auto mt-14 relative z-10">
+          <div className="glass p-6 sm:p-8">
+            
+            {/* Header row with tabs */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-[var(--color-rule)] gap-4">
+              
+
+              {/* Tabs as a ruled list with active dot */}
+              <div className="flex items-center gap-1.5 bg-[var(--color-paper-3)] p-1 rounded-[var(--radius-pill)] border border-[var(--color-rule)]">
+                {(['ai', 'peer', 'counselor'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-3 py-1 rounded-[var(--radius-pill)] text-xs font-medium transition-colors ${
+                      activeTab === tab
+                        ? 'bg-[var(--color-accent)] text-[var(--color-accent-ink)] font-semibold shadow-sm'
+                        : 'text-[var(--color-muted)] hover:text-[var(--color-ink)]'
+                    }`}
+                  >
+                    {tab === 'ai' ? 'AI Bot' : tab === 'peer' ? 'Peer' : 'Counselor'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Content for active level */}
+            <div className="pt-6 space-y-4">
+              <span className="text-xs text-[var(--color-accent-2)] font-medium block">
+                {previewContent[activeTab].tag}
+              </span>
+
+              <h3 className="font-display text-xl sm:text-2xl text-[var(--color-ink)] font-medium">
+                {previewContent[activeTab].title}
+              </h3>
+
+              {/* Message block in smoked glass tier */}
+              <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-inner)] p-4 sm:p-5 text-sm text-[var(--color-ink-2)] leading-relaxed">
+                "{previewContent[activeTab].message}"
+              </div>
+
+              {/* Action pill rows */}
+              <div className="flex flex-wrap gap-2 pt-2">
+                {previewContent[activeTab].options.map((option, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-pill)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-ink-2)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+                    onClick={() => navigate('/register')}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-accent)]" />
+                    {option}
+                  </span>
+                ))}
+              </div>
+
+              {/* Card footer */}
+              <div className="pt-4 border-t border-[var(--color-rule)] flex items-center justify-between text-xs text-[var(--color-muted)]">
+                <span>{previewContent[activeTab].meta}</span>
+                <span
+                  onClick={() => navigate('/register')}
+                  className="text-[var(--color-accent)] hover:underline cursor-pointer inline-flex items-center gap-1 font-medium"
+                >
+                  Try now <ArrowRight className="w-3 h-3" />
+                </span>
+              </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Stats — anchored near the bottom of the viewport */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-auto pt-16">
-            {stats.map((stat, index) => (
+      {/* ── Ruled Tally / System Strip ── */}
+      <section className="border-y border-[var(--color-rule)] bg-[var(--color-paper-2)]">
+        <div className="max-w-6xl mx-auto px-6 py-9">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+              <div className="font-display text-3xl md:text-4xl text-[var(--color-ink)] font-medium mb-1 num">24/7</div>
+              <div className="text-xs text-[var(--color-muted)]">Immediate AI companion</div>
+            </div>
+            <div>
+              <div className="font-display text-3xl md:text-4xl text-[var(--color-ink)] font-medium mb-1 num">100%</div>
+              <div className="text-xs text-[var(--color-muted)]">Anonymous session option</div>
+            </div>
+            <div>
+              <div className="font-display text-3xl md:text-4xl text-[var(--color-ink)] font-medium mb-1 num">&lt; 1 min</div>
+              <div className="text-xs text-[var(--color-muted)]">Average connection speed</div>
+            </div>
+            <div>
+              <div className="font-display text-3xl md:text-4xl text-[var(--color-ink)] font-medium mb-1">Licensed</div>
+              <div className="text-xs text-[var(--color-muted)]">Therapists and trained peers</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Capabilities Section ── */}
+      <section id="capabilities" className="py-24 px-6" ref={features_fade.ref}>
+        <div
+          className={`max-w-6xl mx-auto transition-opacity duration-300 ${
+            features_fade.isVisible ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <div className="max-w-2xl mb-14">
+            <span className="text-xs text-[var(--color-accent)] font-medium block mb-2">Capabilities</span>
+            <h2 className="text-3xl sm:text-4xl font-display font-medium text-[var(--color-ink)] mb-3">
+              Care designed around what you need right now.
+            </h2>
+            <p className="text-sm text-[var(--color-muted)] leading-relaxed">
+              Mental health support should never be rigid. Calmify gives you three clear levels of guidance, from silent exercises to professional psychotherapy.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-5">
+            {capabilities.map((item) => (
               <div
-                key={index}
-                className="text-center rounded-2xl py-8 px-6 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.7)',
-                  border: '1px solid rgba(143,174,155,0.15)',
-                  backdropFilter: 'blur(10px)',
-                  animationDelay: `${0.6 + index * 0.1}s`,
-                }}
+                key={item.step}
+                className="glass p-7 flex flex-col justify-between"
               >
-                <div className="text-3xl md:text-4xl font-heading font-extrabold mb-2" style={{ color: sage }}>
-                  {stat.number}
-                </div>
-                <div className="text-xs uppercase tracking-widest font-medium" style={{ color: '#8A8A8A' }}>
-                  {stat.label}
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-10 h-10 rounded-[var(--radius-inner)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] flex items-center justify-center">
+                      <item.icon className="w-5 h-5 text-[var(--color-accent)]" />
+                    </div>
+                    <span className="text-xs text-[var(--color-muted)] font-medium">{item.step}</span>
+                  </div>
+                  <h3 className="font-display text-xl text-[var(--color-ink)] font-medium mb-2.5">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-[var(--color-muted)] leading-relaxed">
+                    {item.description}
+                  </p>
                 </div>
               </div>
             ))}
@@ -239,301 +322,148 @@ export default function NewHome() {
         </div>
       </section>
 
-      {/* ───────── Features Section ───────── */}
-      <section id="features" className="py-24 px-6" ref={features_fade.ref}>
+      {/* ── How It Works ── */}
+      <section id="how-it-works" className="py-24 px-6 bg-[var(--color-paper-2)] border-t border-[var(--color-rule)]" ref={howItWorks_fade.ref}>
         <div
-          className={`max-w-7xl mx-auto transition-all duration-1000 ease-out ${
-            features_fade.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          className={`max-w-6xl mx-auto transition-opacity duration-300 ${
+            howItWorks_fade.isVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          {/* Section header */}
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-heading font-extrabold mb-6" style={{ color: '#3A3A3A' }}>
-              Everything You Need for Mental Wellness
+          <div className="max-w-2xl mb-14">
+            <span className="text-xs text-[var(--color-accent-2)] font-medium block mb-2">How it works</span>
+            <h2 className="text-3xl sm:text-4xl font-display font-medium text-[var(--color-ink)] mb-3">
+              Support without friction, in three steps.
             </h2>
-            <p className="text-lg max-w-3xl mx-auto" style={{ color: '#6B6B6B', lineHeight: '1.8' }}>
-              Our platform combines cutting-edge AI technology with human expertise to provide
-              personalized, confidential mental health support tailored to your needs.
+            <p className="text-sm text-[var(--color-muted)] leading-relaxed">
+              No mandatory legal names, and no payment forms before you can even speak with someone.
             </p>
           </div>
 
-          {/* Feature cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-7">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="rounded-3xl p-8 transition-all duration-500 hover:shadow-xl hover:-translate-y-2 group"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.75)',
-                  border: '1px solid rgba(143,174,155,0.12)',
-                  backdropFilter: 'blur(10px)',
-                }}
-              >
-                {/* Icon container */}
-                <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 group-hover:shadow-md"
-                  style={{ backgroundColor: `${sage}20` }}
-                >
-                  <feature.icon className="w-7 h-7" style={{ color: sage }} strokeWidth={1.5} />
-                </div>
-                <h3 className="text-lg font-heading font-bold mb-3" style={{ color: '#3A3A3A' }}>
-                  {feature.title}
-                </h3>
-                <p className="text-sm leading-relaxed" style={{ color: '#6B6B6B', lineHeight: '1.7' }}>
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ───────── How It Works Section ───────── */}
-      <section
-        id="how-it-works"
-        className="py-24 px-6"
-        style={{ backgroundColor: 'rgba(255,255,255,0.5)' }}
-        ref={howItWorks_fade.ref}
-      >
-        <div
-          className={`max-w-7xl mx-auto transition-all duration-1000 ease-out ${
-            howItWorks_fade.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-heading font-extrabold mb-6" style={{ color: '#3A3A3A' }}>
-              Getting Support is Simple
-            </h2>
-            <p className="text-lg max-w-3xl mx-auto" style={{ color: '#6B6B6B', lineHeight: '1.8' }}>
-              Our platform guides you to the right level of support based on your needs,
-              whether you need immediate AI assistance, peer support, or professional counseling.
-            </p>
-          </div>
-
-          {/* Steps */}
-          <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-5">
             {[
               {
-                num: '1',
-                title: 'Start Anonymously',
-                desc: 'Begin with our AI chatbot that provides immediate support and assesses your needs while maintaining complete privacy.',
+                step: "01",
+                title: "Open an anonymous chat",
+                desc: "Choose an alias or enter as a guest to immediately share what is on your mind with our AI companion."
               },
               {
-                num: '2',
-                title: 'Get Connected',
-                desc: 'Connect with peer volunteers for empathetic support or licensed counselors for professional therapy and crisis intervention.',
+                step: "02",
+                title: "Choose your level of care",
+                desc: "Stay with the AI for breathing and grounding, or request to be connected with a peer or licensed therapist."
               },
               {
-                num: '3',
-                title: 'Continue Your Journey',
-                desc: 'Access ongoing support, meditation resources, assessments, and crisis intervention whenever you need it.',
-              },
-            ].map((step, index) => (
-              <div key={index} className="text-center group">
-                <div className="relative mb-8">
-                  <div
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto text-2xl font-heading font-extrabold text-white transition-all duration-500 group-hover:shadow-lg group-hover:-translate-y-1"
-                    style={{ backgroundColor: sage }}
-                  >
-                    {step.num}
+                step: "03",
+                title: "Leave or stay connected",
+                desc: "Save your progress securely with an encrypted account or wipe the conversation clean as soon as you close the tab."
+              }
+            ].map((step) => (
+              <div
+                key={step.step}
+                className="bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-card)] p-7 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="text-xs text-[var(--color-accent)] font-medium mb-3">
+                    Step {step.step}
                   </div>
-                  {/* Connecting line */}
-                  {index < 2 && (
-                    <div
-                      className="hidden md:block absolute top-10 left-[calc(50%+48px)] h-[2px]"
-                      style={{
-                        width: 'calc(100% - 48px)',
-                        background: `linear-gradient(to right, ${sage}40, ${sage}10)`,
-                      }}
-                    />
-                  )}
+                  <h3 className="font-display text-lg text-[var(--color-ink)] font-medium mb-2">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-[var(--color-muted)] leading-relaxed">
+                    {step.desc}
+                  </p>
                 </div>
-                <h3 className="text-xl font-heading font-bold mb-4" style={{ color: '#3A3A3A' }}>
-                  {step.title}
-                </h3>
-                <p className="text-sm leading-relaxed" style={{ color: '#6B6B6B', lineHeight: '1.7' }}>
-                  {step.desc}
-                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ───────── Trust / CTA Section ───────── */}
-      <section
-        className="py-24 px-6 relative overflow-hidden"
-        style={{ backgroundColor: sage }}
-        ref={trust_fade.ref}
-      >
-        {/* Subtle organic shapes */}
-        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <div
-            className="absolute -top-20 -right-20 w-[350px] h-[350px] rounded-full"
-            style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}
-          />
-          <div
-            className="absolute -bottom-16 -left-16 w-[280px] h-[280px] rounded-full"
-            style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
-          />
-        </div>
-
+      {/* ── Privacy & Trust Card ── */}
+      <section id="privacy" className="py-24 px-6" ref={trust_fade.ref}>
         <div
-          className={`max-w-7xl mx-auto relative z-10 transition-all duration-1000 ease-out ${
-            trust_fade.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          className={`max-w-5xl mx-auto glass p-8 sm:p-12 transition-opacity duration-300 ${
+            trust_fade.isVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left column — trust points */}
+          <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
-              <h2 className="text-4xl md:text-5xl font-heading font-extrabold text-white mb-8 leading-tight">
-                Your Privacy is Our Promise
+              <span className="text-xs text-[var(--color-accent)] font-medium block mb-2">Safety and ethics</span>
+              <h2 className="text-3xl font-display font-medium text-[var(--color-ink)] leading-tight mb-4">
+                Your vulnerability deserves absolute privacy.
               </h2>
-              <p className="text-lg text-white/85 mb-10" style={{ lineHeight: '1.8' }}>
-                Join thousands who have found support, guidance, and healing through our platform.
-                Your mental health and privacy are our top priorities.
+              <p className="text-sm text-[var(--color-muted)] leading-relaxed mb-6">
+                Calmify is built on the standard that mental health support must be safe to explore. We never sell behavioral data, we support full anonymity, and our clinical protocols follow HIPAA guidelines.
               </p>
-              <div className="space-y-5">
+
+              <div className="space-y-3">
                 {[
-                  'End-to-end encrypted conversations',
-                  'HIPAA compliant security standards',
-                  'Anonymous sessions available',
-                  'Crisis detection and intervention',
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center space-x-3 text-white/90">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-white/20">
-                      <div className="w-2 h-2 bg-white rounded-full" />
-                    </div>
-                    <span className="text-sm font-medium">{item}</span>
+                  "End-to-end encrypted messaging",
+                  "Anonymous sessions with one click",
+                  "Crisis protocol with immediate helpline routing",
+                  "Zero advertising and no data brokerage"
+                ].map((point, i) => (
+                  <div key={i} className="flex items-center gap-2.5 text-xs text-[var(--color-ink-2)]">
+                    <CheckCircle2 className="w-4 h-4 text-[var(--color-accent)] flex-shrink-0" />
+                    <span>{point}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right column — CTA card */}
-            <div
-              className="rounded-3xl p-10 shadow-2xl"
-              style={{ backgroundColor: cream }}
-            >
-              <div className="text-center mb-8">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
-                  style={{ backgroundColor: `${sage}20` }}
-                >
-                  <Heart className="w-8 h-8" style={{ color: sage }} strokeWidth={1.5} />
-                </div>
-                <h3 className="text-2xl font-heading font-bold mb-2" style={{ color: '#3A3A3A' }}>
-                  Ready to Begin?
-                </h3>
-                <p className="text-sm" style={{ color: '#6B6B6B' }}>
-                  Take the first step towards better mental health today.
-                </p>
+            {/* Call to action card */}
+            <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-card)] p-8 text-center shadow-[var(--shadow-card)]">
+              <div className="w-12 h-12 rounded-full bg-[var(--color-paper-3)] border border-[var(--color-rule)] flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-5 h-5 text-[var(--color-accent)]" />
               </div>
-
-              <div className="space-y-4">
-                <button
-                  onClick={() => navigate('/register')}
-                  className="w-full px-8 py-4 text-white text-base font-semibold rounded-full transition-all duration-300 hover:shadow-lg active:scale-[0.98]"
-                  style={{ backgroundColor: sage }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = sageHover}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = sage}
-                >
-                  Start Free Assessment
-                </button>
-                <button
-                  onClick={() => navigate('/crisis')}
-                  className="w-full px-8 py-4 font-semibold rounded-full transition-all duration-300 active:scale-[0.98]"
-                  style={{
-                    backgroundColor: 'rgba(220,78,65,0.06)',
-                    border: '2px solid rgba(220,78,65,0.2)',
-                    color: '#C0554A',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(220,78,65,0.1)'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(220,78,65,0.06)'}
-                >
-                  Emergency Support
-                </button>
-              </div>
-
-              <p className="text-xs mt-6 text-center" style={{ color: '#8A8A8A' }}>
-                ✨ Completely free • 🔒 100% confidential • ⚡ Available 24/7
+              <h3 className="font-display text-2xl text-[var(--color-ink)] font-medium mb-2">
+                Ready to take a breath?
+              </h3>
+              <p className="text-xs text-[var(--color-muted)] mb-6 max-w-xs mx-auto leading-relaxed">
+                Start speaking with someone in under a minute. No credit card, no personal details required.
               </p>
+              <button
+                onClick={() => navigate('/register')}
+                className="w-full inline-flex items-center justify-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-ink)] py-3 px-6 rounded-[var(--radius-pill)] text-xs font-semibold hover:bg-[var(--color-accent-hi)] transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+              >
+                <span>Get started anonymously</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ───────── Footer ───────── */}
-      <footer
-        className="pt-20 pb-10 px-6"
-        style={{ backgroundColor: cream, borderTop: `1px solid rgba(143,174,155,0.12)` }}
-      >
-        <div className="max-w-5xl mx-auto">
-          {/* Brand + tagline — centered, breathing room */}
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              <img src="/calmifylogo.png" alt="Calmify Logo" className="h-8 w-auto object-contain" />
-              <span className="text-lg font-heading font-bold" style={{ color: '#3A3A3A' }}>
-                Calmify
-              </span>
+      {/* ── Footer ── */}
+      <footer className="border-t border-[var(--color-rule)] bg-[var(--color-paper)] py-14 px-6 text-xs text-[var(--color-muted)]">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <img src="/meditation-white.png" alt="Calmify" className="h-6 w-6 object-contain" />
+              <span className="font-display text-base text-[var(--color-ink)] font-medium">Calmify</span>
             </div>
-            <p className="text-sm max-w-md mx-auto" style={{ color: '#8A8A8A', lineHeight: '1.7' }}>
-              Professional mental health support for everyone.
-              Your wellbeing matters.
+            <p className="max-w-sm leading-relaxed">
+              Quiet, confidential mental healthcare for students, individuals, and communities.
             </p>
           </div>
 
-          {/* Link groups — horizontal, spacious */}
-          <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 mb-16">
-            {[
-              {
-                title: 'Platform',
-                links: ['AI Chatbot', 'Peer Support', 'Counselling', 'Crisis Support'],
-              },
-              {
-                title: 'Resources',
-                links: ['Meditation Zone', 'Self-Help Guides', 'Articles', 'FAQ'],
-              },
-              {
-                title: 'Support',
-                links: ['Contact Us', 'Privacy Policy', 'Terms', 'Accessibility'],
-              },
-            ].map((col) => (
-              <div key={col.title} className="min-w-[140px]">
-                <h4 className="text-xs font-heading font-bold uppercase tracking-wider mb-4" style={{ color: '#3A3A3A' }}>
-                  {col.title}
-                </h4>
-                <ul className="space-y-2.5">
-                  {col.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
-                        className="text-sm transition-colors duration-300"
-                        style={{ color: '#8A8A8A' }}
-                        onMouseEnter={e => e.currentTarget.style.color = sage}
-                        onMouseLeave={e => e.currentTarget.style.color = '#8A8A8A'}
-                      >
-                        {link}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          {/* Bottom strip — minimal */}
-          <div
-            className="flex flex-col sm:flex-row justify-between items-center pt-6 gap-3"
-            style={{ borderTop: '1px solid rgba(143,174,155,0.1)' }}
-          >
-            <span className="text-xs" style={{ color: '#ACACAC' }}>
-              © 2025 Calmify
+          <div className="flex flex-wrap gap-8">
+            <a href="#capabilities" className="hover:text-[var(--color-ink)] transition-colors">Capabilities</a>
+            <a href="#how-it-works" className="hover:text-[var(--color-ink)] transition-colors">How it works</a>
+            <a href="#privacy" className="hover:text-[var(--color-ink)] transition-colors">Privacy</a>
+            <span
+              onClick={() => navigate('/crisis')}
+              className="text-[oklch(84%_0.10_25)] hover:underline cursor-pointer font-medium"
+            >
+              Emergency Helpline (988)
             </span>
-            <div className="flex items-center space-x-1.5 text-xs" style={{ color: '#ACACAC' }}>
-              <Lock className="w-3 h-3" strokeWidth={1.5} />
-              <span>Your data is protected and never shared</span>
-            </div>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto mt-10 pt-6 border-t border-[var(--color-rule)] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span>© 2026 Calmify. Built with care for human wellbeing.</span>
+          <div className="flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5" />
+            <span>Encrypted and confidential</span>
           </div>
         </div>
       </footer>

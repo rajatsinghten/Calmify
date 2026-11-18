@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Calendar,
   AlertTriangle,
+  Phone,
   Heart,
   LogOut,
   User,
@@ -158,53 +159,60 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
   };
 
   return (
-    <nav className="bg-card border-b border-border px-4 py-3 sticky top-0 z-50">
-      <div className="flex items-center justify-between">
+    <nav className="bg-[var(--glass)] backdrop-blur-[22px] border-b border-[var(--color-rule)] px-5 py-3 sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto flex items-center justify-between">
         {/* Left side - Logo/Brand */}
         <button
           onClick={handleHomeClick}
-          className="flex items-center gap-2 sm:gap-3 hover:bg-primary/10 rounded-lg p-2 -m-2 transition-colors duration-200 group"
+          className="flex items-center gap-3 hover:bg-[var(--color-paper-2)] px-2.5 py-1.5 rounded-[var(--radius-inner)] -ml-2 transition-colors duration-150 group"
           title="Click to go to home page"
         >
-          <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors duration-200">
-            <IconComponent className="h-5 w-5 text-primary" />
+          <div className="p-1 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[6px] group-hover:border-[var(--color-accent)] transition-colors duration-150 flex items-center justify-center">
+            <img src="/meditation-white.png" alt="Calmify" className="h-5 w-5 object-contain" />
           </div>
-          <div className="flex-1 hidden sm:block">
-            <h2 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-200 text-sm">
-              {getRoleDisplayName()}
-            </h2>
+          <div className="hidden sm:block text-left">
+            <div className="flex items-center gap-2">
+              <span className="font-display text-base text-[var(--color-ink)] font-medium leading-none">
+                Calmify
+              </span>
+              <span className="text-[11px] text-[var(--color-muted)] px-2 py-0.5 rounded-[var(--radius-pill)] bg-[var(--color-paper-2)] border border-[var(--color-rule)]">
+                {getRoleDisplayName()}
+              </span>
+            </div>
             {user && (
-              <p className="text-xs text-muted-foreground group-hover:text-primary/80 transition-colors duration-200">
+              <p className="text-xs text-[var(--color-muted)] leading-none mt-1">
                 {user.profile?.preferredName || user.profile?.firstName || user.username}
               </p>
             )}
           </div>
-          <div className="flex-1 sm:hidden">
-            <h2 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-200 text-sm">
+          <div className="sm:hidden text-left">
+            <span className="text-xs text-[var(--color-ink)] font-medium">
               {getRoleDisplayName()}
-            </h2>
+            </span>
           </div>
         </button>
 
         {/* Center - Quick Actions */}
         <div className="hidden md:flex items-center gap-2">
           <Button
-            variant="ghost"
+            variant="destructive"
             size="sm"
             onClick={() => navigate('/crisis')}
-            className="text-destructive hover:bg-destructive/10"
+            className="text-xs font-medium"
           >
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            Emergency Help
+            <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+            Crisis Help
           </Button>
+          <span className="w-px h-4 bg-[var(--color-rule)] mx-1" />
           <Button
             variant="ghost"
             size="sm"
             asChild
+            className="text-xs text-[var(--color-muted)] hover:text-[var(--color-ink)]"
           >
             <a href="tel:112" className="flex items-center">
-              <AlertTriangle className="h-3 w-3 mr-2" />
-              Crisis Line: 112
+              <Phone className="h-3 w-3 mr-1.5 text-[var(--color-accent-2)]" />
+              Helpline: 112
             </a>
           </Button>
         </div>
@@ -213,68 +221,68 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
+              <Button variant="outline" size="icon" className="h-9 w-9 rounded-[var(--radius-inner)] border-[var(--color-rule)] bg-[var(--color-paper-2)]">
+                <Menu className="h-4 w-4 text-[var(--color-ink)]" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="bottom" className="w-56 mt-1">
-              <DropdownMenuLabel>Navigation</DropdownMenuLabel>
-              <DropdownMenuSeparator />
+            <DropdownMenuContent align="end" side="bottom" className="w-56 mt-1 rounded-[var(--radius-card)] border-[var(--color-rule)] bg-[var(--color-paper-2)] p-1.5 shadow-[var(--shadow-card)] text-[var(--color-ink)]">
+              <DropdownMenuLabel className="text-[11px] text-[var(--color-muted)] px-2 py-1">Navigation</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-[var(--color-rule)]" />
               
               {/* Navigation Items */}
               {roleConfig.items.map((item, index) => {
                 const ItemIcon = item.icon;
                 return (
-                  <DropdownMenuItem key={`${item.url}-${item.title}-${index}`} asChild>
+                  <DropdownMenuItem key={`${item.url}-${item.title}-${index}`} asChild className="rounded-[var(--radius-inner)] focus:bg-[var(--color-paper-3)]">
                     <NavLink
                       to={item.url}
-                      className="flex items-center gap-3 w-full"
+                      className="flex items-center gap-3 w-full px-2 py-1.5 text-sm text-[var(--color-ink)]"
                     >
-                      <ItemIcon className="h-4 w-4" />
+                      <ItemIcon className="h-4 w-4 text-[var(--color-muted)]" />
                       <span>{item.title}</span>
                     </NavLink>
                   </DropdownMenuItem>
                 );
               })}
               
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-[var(--color-rule)]" />
               
               {/* Quick Actions for Mobile */}
               <div className="md:hidden">
-                <DropdownMenuItem asChild>
-                  <NavLink to="/crisis" className="flex items-center gap-3 w-full text-destructive">
+                <DropdownMenuItem asChild className="rounded-[var(--radius-inner)] focus:bg-[var(--color-paper-3)]">
+                  <NavLink to="/crisis" className="flex items-center gap-3 w-full px-2 py-1.5 text-sm text-[oklch(84%_0.10_25)]">
                     <AlertTriangle className="h-4 w-4" />
                     <span>Emergency Help</span>
                   </NavLink>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <a href="tel:112" className="flex items-center gap-3 w-full">
-                    <AlertTriangle className="h-3 w-3" />
+                <DropdownMenuItem asChild className="rounded-[var(--radius-inner)] focus:bg-[var(--color-paper-3)]">
+                  <a href="tel:112" className="flex items-center gap-3 w-full px-2 py-1.5 text-sm text-[var(--color-ink)]">
+                    <Phone className="h-4 w-4 text-[var(--color-muted)]" />
                     <span>Crisis Line: 112</span>
                   </a>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-[var(--color-rule)]" />
               </div>
               
               {/* Home Link */}
-              <DropdownMenuItem asChild>
-                <NavLink to="/" className="flex items-center gap-3 w-full">
-                  <Home className="h-4 w-4" />
+              <DropdownMenuItem asChild className="rounded-[var(--radius-inner)] focus:bg-[var(--color-paper-3)]">
+                <NavLink to="/" className="flex items-center gap-3 w-full px-2 py-1.5 text-sm text-[var(--color-ink)]">
+                  <Home className="h-4 w-4 text-[var(--color-muted)]" />
                   <span>Home</span>
                 </NavLink>
               </DropdownMenuItem>
               
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-[var(--color-rule)]" />
               
               {/* Auth Actions */}
               {isAuthenticated ? (
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-                  <LogOut className="h-4 w-4 mr-3" />
+                <DropdownMenuItem onClick={handleLogout} className="rounded-[var(--radius-inner)] text-[oklch(84%_0.10_25)] focus:bg-[var(--color-paper-3)] px-2 py-1.5 text-sm">
+                  <LogOut className="h-4 w-4 mr-2" />
                   {user?.isAnonymous ? "End Session" : "Logout"}
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={() => navigate('/login')}>
-                  <User className="h-4 w-4 mr-3" />
+                <DropdownMenuItem onClick={() => navigate('/login')} className="rounded-[var(--radius-inner)] focus:bg-[var(--color-paper-3)] px-2 py-1.5 text-sm">
+                  <User className="h-4 w-4 mr-2 text-[var(--color-muted)]" />
                   Login
                 </DropdownMenuItem>
               )}

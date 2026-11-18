@@ -1,8 +1,9 @@
+/* Hallmark · theme: dusk (by request) · genre: modern-minimal · posture: committed */
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, AlertTriangle, Brain, BookOpen, Clock, UserPlus } from "lucide-react";
+import { MessageCircle, AlertTriangle, Brain, BookOpen, Clock, UserPlus, ArrowRight, ShieldCheck } from "lucide-react";
 
 export default function Dashboard() {
   const [searchParams] = useSearchParams();
@@ -36,29 +37,29 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)]">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-slate-50 to-slate-100 py-20">
-          <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Welcome to Your Dashboard
+        <section className="relative py-16 md:py-20 px-6 border-b border-[var(--color-rule)] bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,var(--color-paper-3),transparent_70%)]">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl sm:text-5xl font-display font-medium text-[var(--color-ink)] mb-4 tracking-tight">
+              Welcome to your personal space.
             </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Connect with AI, peers, and counselors in a confidential environment designed for your wellbeing.
+            <p className="text-base text-[var(--color-muted)] mb-8 max-w-xl mx-auto leading-relaxed">
+              Connect with our AI companion, trained community peers, or licensed counselors in a private, unhurried setting.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 px-8 py-3" onClick={handleStartChatbot}>
-                <MessageCircle className="mr-2 h-5 w-5" />
-                Start Chat with AI
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <Button size="lg" className="px-7 py-3 text-sm font-semibold" onClick={handleStartChatbot}>
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Start chat with AI
               </Button>
-              <Button size="lg" variant="destructive" className="px-8 py-3" onClick={() => navigate('/crisis')}>
-                <AlertTriangle className="mr-2 h-5 w-5" />
-                Emergency Help
+              <Button size="lg" variant="destructive" className="px-6 py-3 text-sm font-medium" onClick={() => navigate('/crisis')}>
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                Crisis helpline (988)
               </Button>
               {!isAuthenticated && (
-                <Button size="lg" variant="outline" className="px-8 py-3" onClick={() => navigate('/register')}>
-                  <UserPlus className="mr-2 h-5 w-5" />
-                  Join Community
+                <Button size="lg" variant="outline" className="px-6 py-3 text-sm font-medium" onClick={() => navigate('/register')}>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Create account
                 </Button>
               )}
             </div>
@@ -67,99 +68,172 @@ export default function Dashboard() {
 
         {/* Quick Actions for Authenticated Users */}
         {isAuthenticated && (
-          <section className="py-16 bg-white">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-2xl font-bold text-center mb-8">Quick Actions</h2>
-              <div className="grid md:grid-cols-4 gap-6">
-                <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                     onClick={handleTakeAssessment}>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <BookOpen className="h-6 w-6 text-primary" />
+          <section className="py-14 px-6 border-b border-[var(--color-rule)]">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-xl font-display font-medium text-[var(--color-ink)]">
+                    Quick actions
+                  </h2>
+                  <p className="text-xs text-[var(--color-muted)] mt-1">
+                    Select a resource to begin today's session.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div
+                  className="glass p-6 cursor-pointer hover:border-[var(--color-accent)] transition-colors group flex flex-col justify-between"
+                  onClick={handleTakeAssessment}
+                >
+                  <div>
+                    <div className="w-10 h-10 rounded-[var(--radius-inner)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] flex items-center justify-center mb-4 group-hover:border-[var(--color-accent)] transition-colors">
+                      <BookOpen className="h-5 w-5 text-[var(--color-accent)]" />
+                    </div>
+                    <h3 className="text-base font-display font-medium text-[var(--color-ink)] mb-1">
+                      Clinical assessment
+                    </h3>
+                    <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+                      PHQ-9 screening and depression tracker
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">Take Assessment</h3>
-                  <p className="text-muted-foreground mb-4">PHQ-9 depression screening</p>
+                  <div className="mt-4 pt-3 border-t border-[var(--color-rule)] text-xs text-[var(--color-accent)] font-medium flex items-center justify-between">
+                    <span>Begin test</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </div>
                 </div>
 
-                <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                     onClick={() => navigate('/peer/request')}>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <MessageCircle className="h-6 w-6 text-primary" />
+                <div
+                  className="glass p-6 cursor-pointer hover:border-[var(--color-accent)] transition-colors group flex flex-col justify-between"
+                  onClick={() => navigate('/peer/request')}
+                >
+                  <div>
+                    <div className="w-10 h-10 rounded-[var(--radius-inner)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] flex items-center justify-center mb-4 group-hover:border-[var(--color-accent)] transition-colors">
+                      <MessageCircle className="h-5 w-5 text-[var(--color-accent-2)]" />
+                    </div>
+                    <h3 className="text-base font-display font-medium text-[var(--color-ink)] mb-1">
+                      Peer support
+                    </h3>
+                    <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+                      Connect with trained volunteer listeners
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">Peer Support</h3>
-                  <p className="text-muted-foreground mb-4">Connect with trained volunteers</p>
+                  <div className="mt-4 pt-3 border-t border-[var(--color-rule)] text-xs text-[var(--color-accent-2)] font-medium flex items-center justify-between">
+                    <span>Find peer</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </div>
                 </div>
 
-                <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                     onClick={() => navigate('/counselor/request')}>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Clock className="h-6 w-6 text-primary" />
+                <div
+                  className="glass p-6 cursor-pointer hover:border-[var(--color-accent)] transition-colors group flex flex-col justify-between"
+                  onClick={() => navigate('/counselor/request')}
+                >
+                  <div>
+                    <div className="w-10 h-10 rounded-[var(--radius-inner)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] flex items-center justify-center mb-4 group-hover:border-[var(--color-accent)] transition-colors">
+                      <Clock className="h-5 w-5 text-[var(--color-accent)]" />
+                    </div>
+                    <h3 className="text-base font-display font-medium text-[var(--color-ink)] mb-1">
+                      Professional help
+                    </h3>
+                    <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+                      Consult with verified licensed therapists
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">Professional Help</h3>
-                  <p className="text-muted-foreground mb-4">Talk to licensed counselors</p>
+                  <div className="mt-4 pt-3 border-t border-[var(--color-rule)] text-xs text-[var(--color-accent)] font-medium flex items-center justify-between">
+                    <span>Book session</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </div>
                 </div>
 
-                <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                     onClick={() => navigate('/meditation')}>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Brain className="h-6 w-6 text-primary" />
+                <div
+                  className="glass p-6 cursor-pointer hover:border-[var(--color-accent)] transition-colors group flex flex-col justify-between"
+                  onClick={() => navigate('/meditation')}
+                >
+                  <div>
+                    <div className="w-10 h-10 rounded-[var(--radius-inner)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] flex items-center justify-center mb-4 group-hover:border-[var(--color-accent)] transition-colors">
+                      <Brain className="h-5 w-5 text-[var(--color-accent-2)]" />
+                    </div>
+                    <h3 className="text-base font-display font-medium text-[var(--color-ink)] mb-1">
+                      Meditation
+                    </h3>
+                    <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+                      Guided breathing and grounding soundscapes
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">Meditation</h3>
-                  <p className="text-muted-foreground mb-4">Guided relaxation exercises</p>
+                  <div className="mt-4 pt-3 border-t border-[var(--color-rule)] text-xs text-[var(--color-accent-2)] font-medium flex items-center justify-between">
+                    <span>Start practice</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </div>
                 </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* Features Section */}
-        <section className="py-16 bg-white">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-bold text-center mb-8">How We Support You</h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Brain className="h-6 w-6 text-primary" />
+        {/* Support Capabilities Grid */}
+        <section className="py-14 px-6">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-xl font-display font-medium text-[var(--color-ink)] mb-8">
+              How we support your wellness
+            </h2>
+            <div className="grid md:grid-cols-3 gap-5">
+              <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-card)] p-7">
+                <div className="w-10 h-10 rounded-[var(--radius-inner)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] flex items-center justify-center mb-4">
+                  <Brain className="h-5 w-5 text-[var(--color-accent)]" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-foreground">24/7 AI Support</h3>
-                <p className="text-muted-foreground mb-4">Always available chatbot for immediate support and guidance</p>
+                <h3 className="text-lg font-display font-medium text-[var(--color-ink)] mb-2">
+                  24/7 AI companion
+                </h3>
+                <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+                  Always-available crisis-trained chatbot for immediate reflection, journaling, and grounding.
+                </p>
               </div>
 
-              <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="h-6 w-6 text-primary" />
+              <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-card)] p-7">
+                <div className="w-10 h-10 rounded-[var(--radius-inner)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] flex items-center justify-center mb-4">
+                  <BookOpen className="h-5 w-5 text-[var(--color-accent)]" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-foreground">Evidence-Based Assessments</h3>
-                <p className="text-muted-foreground mb-4">PHQ-9, GAD-7, and other validated screening tools</p>
+                <h3 className="text-lg font-display font-medium text-[var(--color-ink)] mb-2">
+                  Validated screenings
+                </h3>
+                <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+                  Standardized tools including PHQ-9 and GAD-7 to help you track emotional patterns over time.
+                </p>
               </div>
 
-              <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 bg-destructive/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Clock className="h-6 w-6 text-destructive" />
+              <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-card)] p-7">
+                <div className="w-10 h-10 rounded-[var(--radius-inner)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] flex items-center justify-center mb-4">
+                  <Clock className="h-5 w-5 text-[oklch(84%_0.10_25)]" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-foreground">Crisis Intervention</h3>
-                <p className="text-muted-foreground mb-4">Immediate support when you need it most</p>
+                <h3 className="text-lg font-display font-medium text-[var(--color-ink)] mb-2">
+                  Immediate crisis routing
+                </h3>
+                <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+                  Instant connections to crisis lifelines and emergency intervention when you are in distress.
+                </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Call to Action */}
+        {/* Call to Action for Guests */}
         {!isAuthenticated && (
-          <section className="py-16 bg-gradient-to-br from-slate-50 to-slate-100">
-            <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-              <h2 className="text-3xl font-bold text-foreground mb-4">
-                Ready to Start Your Journey?
+          <section className="py-14 px-6 border-t border-[var(--color-rule)] bg-[var(--color-paper-2)]">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-2xl font-display font-medium text-[var(--color-ink)] mb-3">
+                Ready to begin your journey?
               </h2>
-              <p className="text-xl text-muted-foreground mb-8">
-                Join thousands of people who have found support and guidance through our platform.
+              <p className="text-xs text-[var(--color-muted)] mb-6 leading-relaxed">
+                Join a quiet, private community dedicated to listening and mental health support.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" onClick={() => navigate('/register')}>
-                  <UserPlus className="mr-2 h-5 w-5" />
-                  Create Account
+              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                <Button size="lg" className="px-7 py-3 text-xs font-semibold" onClick={() => navigate('/register')}>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Create account
                 </Button>
-                <Button size="lg" variant="outline" onClick={handleAnonymousStart}>
-                  Try Anonymously
+                <Button size="lg" variant="outline" className="px-6 py-3 text-xs font-medium" onClick={handleAnonymousStart}>
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  Try anonymously
                 </Button>
               </div>
             </div>

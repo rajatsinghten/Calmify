@@ -56,7 +56,7 @@ Use these pre-configured accounts to log in and explore the role-based workflows
    ```bash
    npm install
    ```
-3. Create a `.env` file based on `.env.example` (points to `http://localhost:5001/api` by default).
+3. Create a `.env` file based on `.env.example` (points to `http://localhost:5001/api`, matching the backend port).
 4. Start the Vite development server (runs on port `8080`):
    ```bash
    npm run dev

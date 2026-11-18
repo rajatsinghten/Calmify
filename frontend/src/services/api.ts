@@ -1,5 +1,6 @@
 // API Service Layer for Calmify Mental Health Platform
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/$/, '');
+const API_SERVER_URL = API_BASE_URL.replace(/\/api$/, '');
 
 interface ApiResponse<T = any> {
   success?: boolean;
@@ -547,7 +548,7 @@ class ApiService {
   // Health check method to test connection
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
     try {
-      const response = await fetch('http://localhost:5000/health', {
+      const response = await fetch(`${API_SERVER_URL}/health`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -557,7 +558,7 @@ class ApiService {
       return await this.handleResponse<any>(response);
     } catch (error) {
       console.error('Health check failed:', error);
-      throw new Error('Unable to connect to the backend server. Please ensure it is running on http://localhost:5000');
+      throw new Error(`Unable to connect to the backend server at ${API_SERVER_URL}. Please start the backend and check VITE_API_URL.`);
     }
   }
 
