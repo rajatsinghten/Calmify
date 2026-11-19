@@ -343,7 +343,7 @@ export default function ChatbotPage() {
           sidebarCollapsed ? 'w-0 overflow-hidden' : 'w-80'
         }`}>
           {/* Sidebar Header */}
-          <div className="p-4 border-b border-primary/20 flex-shrink-0 bg-white/50 backdrop-blur-sm">
+          <div className="p-4 border-b border-primary/20 flex-shrink-0 bg-card/50 backdrop-blur-sm">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold text-foreground">Chat History</h2>
               <Button
@@ -476,7 +476,7 @@ export default function ChatbotPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setSidebarCollapsed(false)}
-                className="bg-white shadow-md"
+                className="bg-card shadow-md border-border"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -507,7 +507,7 @@ export default function ChatbotPage() {
                   size="sm"
                   onClick={closeSession}
                   disabled={loading || !activeChat._id}
-                  className="text-orange-600 hover:bg-orange-50 border-orange-200"
+                  className="text-amber-400 border-amber-500/30 bg-card hover:bg-amber-500/20 hover:text-amber-300 hover:border-amber-400/50 transition-colors shadow-sm"
                 >
                   {loading ? (
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -568,9 +568,9 @@ export default function ChatbotPage() {
                       </div>
                       <Card className={`p-3 ${
                         message.isBot 
-                          ? 'bg-white/90 backdrop-blur-sm border border-primary/10 shadow-sm' 
+                          ? 'bg-card/90 backdrop-blur-sm border border-border shadow-sm text-foreground' 
                           : 'bg-primary text-primary-foreground border border-primary shadow-sm'
-                      } ${message.crisisDetected ? 'border-red-200 bg-red-50/50' : ''}`}>
+                      } ${message.crisisDetected ? 'border-destructive/40 bg-destructive/15' : ''}`}>
                         <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                         
                         {/* Crisis Counselor Booking Button */}
@@ -622,7 +622,7 @@ export default function ChatbotPage() {
                       <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center flex-shrink-0">
                         <Bot className="h-4 w-4 text-primary" />
                       </div>
-                      <Card className="p-3 bg-white/90 backdrop-blur-sm border border-primary/10 shadow-sm">
+                      <Card className="p-3 bg-card/90 backdrop-blur-sm border border-border shadow-sm">
                         <div className="flex space-x-1">
                           <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
                           <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -648,10 +648,7 @@ export default function ChatbotPage() {
             placeholder={currentSessionId === "current" ? "Share what's on your mind..." : "This is a past session (read-only)"}
             disabled={isTyping || currentSessionId !== "current" || loadingActiveChat}
             isLoading={isTyping}
-            helpText={currentSessionId === "current" 
-              ? "This is an AI psychology expert. For emergencies, call 112 or crisis helplines."
-              : "Viewing past session - switch to current session to continue chatting"
-            }
+          
           />
         </div>
       </div>

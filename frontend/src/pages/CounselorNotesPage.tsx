@@ -784,23 +784,23 @@ export default function CounselorNotesPage() {
                   placeholder="Enter patient ID/username (try 'test-patient-id')"
                 />
                 {(showPatientDropdown && patients.length > 0) && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-60 overflow-auto">
                     {patients.map((patient) => (
                       <div
                         key={patient._id}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        className="px-4 py-2 hover:bg-muted cursor-pointer"
                         onClick={() => handleSelectPatient(patient)}
                       >
-                        <div className="font-medium">{patient.displayName}</div>
-                        <div className="text-sm text-gray-500">@{patient.username}</div>
+                        <div className="font-medium text-foreground">{patient.displayName}</div>
+                        <div className="text-sm text-muted-foreground">@{patient.username}</div>
                       </div>
                     ))}
                   </div>
                 )}
                 {patientSearch.length >= 2 && patients.length === 0 && !showPatientDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                  <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-md shadow-lg">
                     <div
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-blue-600"
+                      className="px-4 py-2 hover:bg-muted cursor-pointer text-primary"
                       onClick={() => handleSelectPatient({
                         _id: "test-patient-id",
                         username: "testpatient",

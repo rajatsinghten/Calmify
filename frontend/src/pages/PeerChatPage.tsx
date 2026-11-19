@@ -429,7 +429,7 @@ export default function PeerChatPage() {
                       size="sm" 
                       variant="outline" 
                       onClick={openEscalateDialog}
-                      className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                      className="text-amber-400 border-amber-500/30 bg-card hover:bg-amber-500/20 hover:text-amber-300 hover:border-amber-400/50 transition-colors shadow-sm"
                       disabled={loading}
                     >
                       <AlertTriangle className="h-4 w-4 mr-2" />
@@ -477,7 +477,7 @@ export default function PeerChatPage() {
                       <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center flex-shrink-0">
                         <User className="h-4 w-4 text-blue-600" />
                       </div>
-                      <div className="bg-white/90 backdrop-blur-sm border border-primary/10 rounded-lg px-3 py-2 shadow-sm">
+                      <div className="bg-card/90 backdrop-blur-sm border border-border rounded-lg px-3 py-2 shadow-sm text-foreground">
                         <div className="flex space-x-1">
                           <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
                           <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>

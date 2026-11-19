@@ -28,7 +28,7 @@ export function ChatInput({
 }: ChatInputProps) {
   return (
     <div className={cn(
-      "bg-gradient-to-r from-primary/5 to-primary/10 backdrop-blur-sm border-t border-primary/20 p-4",
+      "bg-card/80 backdrop-blur-md border-t border-border p-4",
       className
     )}>
       <div className="flex gap-2">
@@ -38,13 +38,13 @@ export function ChatInput({
           placeholder={placeholder}
           onKeyPress={onKeyPress}
           disabled={disabled || isLoading}
-          className="flex-1 bg-white/80 backdrop-blur-sm border-primary/20 focus:border-primary focus:ring-primary/20"
+          className="flex-1 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/40"
         />
         <Button 
           onClick={onSend} 
           disabled={!value.trim() || disabled || isLoading}
           size="icon"
-          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
         >
           <Send className="h-4 w-4" />
         </Button>

@@ -297,14 +297,16 @@ export default function SessionDetailsPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Patient</p>
-                      <p className="text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 text-left">
+                    <User className="h-4 w-4 text-primary flex-shrink-0" />
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-foreground leading-tight">
                         {session.patientId.profile?.preferredName || 
                          session.patientId.profile?.firstName || 
                          session.patientId.username}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium leading-none mt-0.5">
+                        Patient
                       </p>
                     </div>
                   </div>
@@ -419,7 +421,7 @@ export default function SessionDetailsPage() {
                         size="sm" 
                         variant="outline" 
                         onClick={openEscalateDialog}
-                        className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                        className="text-amber-400 border-amber-500/30 bg-card hover:bg-amber-500/20 hover:text-amber-300 hover:border-amber-400/50 transition-colors shadow-sm"
                         disabled={escalating}
                       >
                         <AlertTriangle className="h-4 w-4 mr-2" />

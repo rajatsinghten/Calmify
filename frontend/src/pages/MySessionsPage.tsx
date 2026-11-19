@@ -5,7 +5,13 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { 
   Clock, 
   MessageCircle, 
@@ -48,15 +54,11 @@ const MySessionsPage: React.FC = () => {
   const [availableSessions, setAvailableSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [availableLoading, setAvailableLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('sessions');
   const [sessionFilter, setSessionFilter] = useState('all');
-
-  useEffect(() => {
-    fetchAllSessions();
-  }, []);
 
   const fetchAllSessions = async () => {
     try {
+      setLoading(true);
       const response = await apiService.getMySessions({
         status: sessionFilter === 'all' ? undefined : sessionFilter,
         limit: 50
@@ -85,19 +87,12 @@ const MySessionsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchAllSessions();
-  }, [sessionFilter]);
-
-  useEffect(() => {
-    // Fetch available sessions when switching to available tab and user is a helper
-    if (activeTab === 'available' && ['peer', 'counselor'].includes(user?.role || '')) {
+    if (sessionFilter === 'available') {
       fetchAvailableSessions();
+    } else {
+      fetchAllSessions();
     }
-  }, [activeTab, user?.role]);
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-  };
+  }, [sessionFilter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -225,43 +220,80 @@ const MySessionsPage: React.FC = () => {
   return (
     <Layout>
       <div className="space-y-6 p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">My Sessions</h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {user?.role === 'patient' ? 'Track your support sessions and progress' :
                user?.role === 'peer' ? 'Manage your peer support sessions' :
                user?.role === 'counselor' ? 'View your counseling sessions and caseload' :
                'Session management interface'}
             </p>
           </div>
+
+          <div className="flex items-center gap-3">
+            <Select value={sessionFilter} onValueChange={(val) => setSessionFilter(val)}>
+              <SelectTrigger className="w-[190px] bg-card border-border text-foreground hover:bg-muted/40 focus:ring-primary shadow-sm">
+                <SelectValue placeholder="All Sessions" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border text-foreground shadow-xl">
+                <SelectItem value="all">All Sessions</SelectItem>
+                <SelectItem value="waiting">Waiting</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="escalated">Escalated</SelectItem>
+                {['peer', 'counselor'].includes(user?.role || '') && (
+                  <SelectItem value="available">Available Sessions</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList>
-          <TabsTrigger value="sessions">All Sessions</TabsTrigger>
-          {['peer', 'counselor'].includes(user?.role || '') && (
-            <TabsTrigger value="available">Available Sessions</TabsTrigger>
-          )}
-        </TabsList>
-
-
-
-        <TabsContent value="sessions" className="space-y-4">
-          <div className="flex items-center gap-4">
-            <select 
-              value={sessionFilter} 
-              onChange={(e) => setSessionFilter(e.target.value)}
-              className="px-3 py-2 border rounded-md"
-            >
-              <option value="all">All Sessions</option>
-              <option value="waiting">Waiting</option>
-              <option value="active">Active</option>
-              <option value="closed">Closed</option>
-              <option value="escalated">Escalated</option>
-            </select>
-          </div>
-
+        {sessionFilter === 'available' && ['peer', 'counselor'].includes(user?.role || '') ? (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Available Sessions</CardTitle>
+                  <CardDescription>
+                    Sessions waiting for {user?.role} support - sorted by urgency
+                  </CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={fetchAvailableSessions}
+                  disabled={availableLoading}
+                >
+                  {availableLoading ? 'Refreshing...' : 'Refresh'}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {availableLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="text-muted-foreground mt-2">Loading available sessions...</p>
+                  </div>
+                ) : availableSessions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No sessions available</h3>
+                    <p className="text-muted-foreground">
+                      All sessions are currently being handled. Check back later.
+                    </p>
+                  </div>
+                ) : (
+                  availableSessions.map((session) => (
+                    <SessionCard key={session._id} session={session} showActions={true} />
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
           <div className="space-y-3">
             {allSessions.length === 0 ? (
               <Card>
@@ -281,55 +313,7 @@ const MySessionsPage: React.FC = () => {
               ))
             )}
           </div>
-        </TabsContent>
-
-        {['peer', 'counselor'].includes(user?.role || '') && (
-          <TabsContent value="available" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Available Sessions</CardTitle>
-                    <CardDescription>
-                      Sessions waiting for {user?.role} support - sorted by urgency
-                    </CardDescription>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={fetchAvailableSessions}
-                    disabled={availableLoading}
-                  >
-                    {availableLoading ? 'Refreshing...' : 'Refresh'}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {availableLoading ? (
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                      <p className="text-muted-foreground mt-2">Loading available sessions...</p>
-                    </div>
-                  ) : availableSessions.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No sessions available</h3>
-                      <p className="text-muted-foreground">
-                        All sessions are currently being handled. Check back later.
-                      </p>
-                    </div>
-                  ) : (
-                    availableSessions.map((session) => (
-                      <SessionCard key={session._id} session={session} showActions={true} />
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         )}
-      </Tabs>
       </div>
     </Layout>
   );

@@ -24,9 +24,28 @@ function useFadeInOnScroll() {
 
 export default function NewHome() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, createAnonymousSession } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState<'ai' | 'peer' | 'counselor'>('ai');
+  const [isStartingAnonymous, setIsStartingAnonymous] = useState(false);
+
+  const handleStartAnonymous = async () => {
+    if (isAuthenticated) {
+      navigate('/chatbot');
+      return;
+    }
+
+    try {
+      setIsStartingAnonymous(true);
+      await createAnonymousSession();
+      navigate('/chatbot');
+    } catch (error) {
+      console.error('Failed to create anonymous session:', error);
+      navigate('/chatbot');
+    } finally {
+      setIsStartingAnonymous(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 30);
@@ -160,10 +179,11 @@ export default function NewHome() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-12">
             <button
-              onClick={() => navigate('/register')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-ink)] px-7 py-3 rounded-[var(--radius-pill)] font-semibold text-sm hover:bg-[var(--color-accent-hi)] transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+              onClick={handleStartAnonymous}
+              disabled={isStartingAnonymous}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-ink)] px-7 py-3 rounded-[var(--radius-pill)] font-semibold text-sm hover:bg-[var(--color-accent-hi)] transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] disabled:opacity-70 cursor-pointer"
             >
-              <span>Start free and anonymous</span>
+              <span>{isStartingAnonymous ? "Starting session..." : "Start free and anonymous"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
@@ -232,7 +252,7 @@ export default function NewHome() {
                   <span
                     key={idx}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-pill)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-ink-2)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
-                    onClick={() => navigate('/register')}
+                    onClick={handleStartAnonymous}
                   >
                     <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-accent)]" />
                     {option}
@@ -244,7 +264,7 @@ export default function NewHome() {
               <div className="pt-4 border-t border-[var(--color-rule)] flex items-center justify-between text-xs text-[var(--color-muted)]">
                 <span>{previewContent[activeTab].meta}</span>
                 <span
-                  onClick={() => navigate('/register')}
+                  onClick={handleStartAnonymous}
                   className="text-[var(--color-accent)] hover:underline cursor-pointer inline-flex items-center gap-1 font-medium"
                 >
                   Try now <ArrowRight className="w-3 h-3" />
@@ -422,10 +442,11 @@ export default function NewHome() {
                 Start speaking with someone in under a minute. No credit card, no personal details required.
               </p>
               <button
-                onClick={() => navigate('/register')}
-                className="w-full inline-flex items-center justify-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-ink)] py-3 px-6 rounded-[var(--radius-pill)] text-xs font-semibold hover:bg-[var(--color-accent-hi)] transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+                onClick={handleStartAnonymous}
+                disabled={isStartingAnonymous}
+                className="w-full inline-flex items-center justify-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-ink)] py-3 px-6 rounded-[var(--radius-pill)] text-xs font-semibold hover:bg-[var(--color-accent-hi)] transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] disabled:opacity-70 cursor-pointer"
               >
-                <span>Get started anonymously</span>
+                <span>{isStartingAnonymous ? "Starting session..." : "Get started anonymously"}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
